@@ -23,11 +23,11 @@
 🔸➖🔹➖🔸➖🔹
 cd $HOME
 🔸➖🔹➖🔸➖🔹
-git clone https://github.com/moody2020/bossss.git
+git clone https://github.com/moody2020/TH3BOSS.git
 🔸➖🔹➖🔸➖🔹
-cd bossss
+cd TH3BOSS
 🔸➖🔹➖🔸➖🔹
-chmod +x bossss.sh
+chmod +x TH3BOSS.sh
 🔸➖🔹➖🔸➖🔹
 ./TH3BOSS.sh install
 🔸➖🔹➖🔸➖🔹
