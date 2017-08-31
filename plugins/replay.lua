@@ -1,1181 +1,525 @@
---Begin Tools.lua :)
-local SUDO = 60809019 -- حط ايديك هنا <===
-function exi_files(cpath)
-    local files = {}
-    local pth = cpath
-    for k, v in pairs(scandir(pth)) do
-		table.insert(files, v)
-    end
-    return files
-end
+do 
+local function run(msg, matches) 
 
-local function file_exi(name, cpath)
-    for k,v in pairs(exi_files(cpath)) do
-        if name == v then
-            return true
-        end
-    end
-    return false
-end
-local function run_bash(str)
-    local cmd = io.popen(str)
-    local result = cmd:read('*all')
-    return result
-end
-local function index_function(user_id)
-  for k,v in pairs(_config.admins) do
-    if user_id == v[1] then
-    	print(k)
-      return k
-    end
-  end
-  -- If not found
-  return false
-end
-local function getindex(t,id) 
-for i,v in pairs(t) do 
-if v == id then 
-return i 
-end 
-end 
-return nil 
-end 
-local function mohammed_sudo(user_id)
-  for k,v in pairs(_config.sudo_users) do
-    if user_id == v then
-      return k
-    end
-  end
-  -- If not found
-  return false
-end
+if is_silent_user(msg.from.id, msg.to.id) then return end
 
-local function reload_plugins( ) 
-  plugins = {} 
-  load_plugins() 
-end
-
-local function exi_file()
-    local files = {}
-    local pth = tcpath..'/data/document'
-    for k, v in pairs(scandir(pth)) do
-        if (v:match('.lua$')) then
-            table.insert(files, v)
-        end
-    end
-    return files
-end
-
-local function pl_exi(name)
-    for k,v in pairs(exi_file()) do
-        if name == v then
-            return true
-        end
-    end
-    return false
-end
-
-
-local function sudolist(msg)
-local sudo_users = _config.sudo_users
-text = "*🌟| قائمه المطورين : *\n"
-for i=1,#sudo_users do
-    text = text..i.." - "..sudo_users[i].."\n"
-end
-return text
-end
-
-local function adminlist(msg)
-local sudo_users = _config.sudo_users
-text = "*🌟| قائمه الاداريين : *\n"
-		  	local compare = text
-		  	local i = 1
-		  	for v,user in pairs(_config.admins) do
-			    text = text..i..'- '..(user[2] or '')..' ➣ ('..user[1]..')\n'
-		  	i = i +1
-		  	end
-		  	if compare == text then
-		text = '* 🌟| لا يوجد اداريين  *'
-		  	end
-		  	return text
-    end
-
-local function chat_list(msg)
-	i = 1
-	local data = load_data(_config.moderation.data)
-    local groups = 'groups'
-    if not data[tostring(groups)] then
-        return 'لا يوجد مجموعات مفعلة حاليا .'
-    end
-    local message = '🌟| قـائمـه الـكـروبـات :\n\n'
-    for k,v in pairsByKeys(data[tostring(groups)]) do
-		local group_id = v
-		if data[tostring(group_id)] then
-			settings = data[tostring(group_id)]['settings']
-		end
-        for m,n in pairsByKeys(settings) do
-			if m == 'set_name' then
-				name = n:gsub("", "")
-				chat_name = name:gsub("‮", "")
-				 group_name_id = name .. ' \n* ايدي : [<code>' ..group_id.. '</code>]\n'
-
-					group_info = i..' ـ '..group_name_id
-
-				i = i + 1
-			end
-        end
-		message = message..group_info
-    end
-	return tdcli.sendMessage(msg.to.id, 0, 1,message, 0, "html")   
-end
-
-
-
-
-
-
-local function botrem(msg)
-	local data = load_data(_config.moderation.data)
-	data[tostring(msg.to.id)] = nil
-	save_data(_config.moderation.data, data)
-	local groups = 'groups'
-	if not data[tostring(groups)] then
-		data[tostring(groups)] = nil
-		save_data(_config.moderation.data, data)
-	end
-	data[tostring(groups)][tostring(msg.to.id)] = nil
-	save_data(_config.moderation.data, data)
-	if redis:get('CheckExpire::'..msg.to.id) then
-		redis:del('CheckExpire::'..msg.to.id)
-	end
-	if redis:get('ExpireDate:'..msg.to.id) then
-		redis:del('ExpireDate:'..msg.to.id)
-	end
-	tdcli.changeChatMemberStatus(msg.to.id, our_id, 'Left', dl_cb, nil)
-end
-
-local function warning(msg)
-			local expiretime = redis:ttl('ExpireDate:'..msg.to.id)
-	if expiretime == -1 then
-		return
-	else
-	local d = math.floor(expiretime / 86400) + 1
-        if tonumber(d) == 1 and not is_sudo(msg) and is_mod(msg) then
-				tdcli.sendMessage(msg.to.id, 0, 1, '🌟| يرجى التواصل مع مطور البوت لتجديد اشتراك البوت والا ساخرج تلقائيا ‼️', 1, 'md')
-			
-		end
-	end
-end
-
-local function action_by_reply(arg, data)
-    local cmd = arg.cmd
-if not tonumber(data.sender_user_id_) then return false end
-    if data.sender_user_id_ then
-    if cmd == "رفع اداري" then
-local function adminprom_cb(arg, data)
-if data.username_ then
-user_name = '@'..check_markdown(data.username_)
-else
-user_name = check_markdown(data.first_name_)
-end
-if is_admin1(tonumber(data.id_)) then
- return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_انه بالتأكيد اداري ☑️_', 0, "md")
-   end
-	    table.insert(_config.admins, {tonumber(data.id_), user_name})
-		save_config()
- return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_تمت ترقيته ليصبح اداري ☑️_', 0, "md")
-end
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = data.sender_user_id_
-  }, adminprom_cb, {chat_id=data.chat_id_,user_id=data.sender_user_id_})
-  end
-    if cmd == "تنزيل اداري" then
-local function admindem_cb(arg, data)
-	local nameid = index_function(tonumber(data.id_))
-if data.username_ then
-user_name = '@'..check_markdown(data.username_)
-else
-user_name = check_markdown(data.first_name_)
-end
-if not is_admin1(data.id_) then
- return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس اداري ☑️_', 0, "md")
-   end
-		table.remove(_config.admins, nameid)
-		save_config()
-
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من الاداره ☑️_', 0, "md")
-end
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = data.sender_user_id_
-  }, admindem_cb, {chat_id=data.chat_id_,user_id=data.sender_user_id_})
-  end
-       if cmd == "رفع مطور" then
-local function visudo_cb(arg, data)
-if data.username_ then
-user_name = '@'..check_markdown(data.username_)
-else
-user_name = check_markdown(data.first_name_)
-end
-if mohammed_sudo(tonumber(data.id_)) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد مطور ☑️_', 0, "md")
-   end
-          table.insert(_config.sudo_users, tonumber(data.id_))
-		save_config()
-     reload_plugins(true)
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم ترقيته ليصبح مطور ☑️_', 0, "md")
-end
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = data.sender_user_id_
-  }, visudo_cb, {chat_id=data.chat_id_,user_id=data.sender_user_id_})
-  end
-    if cmd == "تنزيل مطور" then
-local function desudo_cb(arg, data)
-if data.username_ then
-user_name = '@'..check_markdown(data.username_)
-else
-user_name = check_markdown(data.first_name_)
-end
-     if not mohammed_sudo(data.id_) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس مطور ☑️_', 0, "md")
-   end
-          table.remove(_config.sudo_users, getindex( _config.sudo_users, tonumber(data.id_)))
-		save_config()
-     reload_plugins(true) 
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من المطورين ☑️_', 0, "md")
-end
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = data.sender_user_id_
-  }, desudo_cb, {chat_id=data.chat_id_,user_id=data.sender_user_id_})
-  end
-else
-  return tdcli.sendMessage(data.chat_id_, "", 0, "*🌟| لا يوجد", 0, "md")
-   end
-end
-
-local function action_by_username(arg, data)
-    local cmd = arg.cmd
-if not arg.username then return false end
-    if data.id_ then
-if data.type_.user_.username_ then
-user_name = '@'..check_markdown(data.type_.user_.username_)
-else
-user_name = check_markdown(data.title_)
-end
-    if cmd == "رفع اداري" then
-if is_admin1(tonumber(data.id_)) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد اداري ☑️_', 0, "md")
-   end
-	    table.insert(_config.admins, {tonumber(data.id_), user_name})
-		save_config()
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم ترقيته ليصبح اداري ☑️_', 0, "md")
-end
-    if cmd == "تنزيل اداري" then
-	local nameid = index_function(tonumber(data.id_))
-if not is_admin1(data.id_) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس اداري ☑️_', 0, "md")
-   end
-		table.remove(_config.admins, nameid)
-		save_config()
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من الاداره ☑️_', 0, "md")
-end
-    if cmd == "رفع مطور" then
-if mohammed_sudo(tonumber(data.id_)) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد مطور ☑️_', 0, "md")
-   end
-          table.insert(_config.sudo_users, tonumber(data.id_))
-		save_config()
-     reload_plugins(true)
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم ترقيته ليصبح مطور ☑️_', 0, "md")
-end
-    if cmd == "تنزيل مطور" then
-     if not mohammed_sudo(data.id_) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس مطور ☑️_', 0, "md")
-   end
-          table.remove(_config.sudo_users, getindex( _config.sudo_users, tonumber(data.id_)))
-		save_config()
-     reload_plugins(true) 
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من المطورين ☑️_', 0, "md")
-   end
-else
-  return tdcli.sendMessage(arg.chat_id, "", 0, "_🌟|  لا يوجد _", 0, "md")
-   end
-end
-
-local function action_by_id(arg, data)
-    local cmd = arg.cmd
-if not tonumber(arg.user_id) then return false end
-   if data.id_ then
-if data.username_ then
-user_name = '@'..check_markdown(data.username_)
-else
-user_name = check_markdown(data.first_name_)
-end
-    if cmd == "رفع اداري" then
-if is_admin1(tonumber(data.id_)) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد اداري ☑️_', 0, "md")
-   end
-	    table.insert(_config.admins, {tonumber(data.id_), user_name})
-		save_config()
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تمت ترقيته ليصبح اداري ☑️_', 0, "md")
-end 
-    if cmd == "تنزيل اداري" then
-	local nameid = index_function(tonumber(data.id_))
-if not is_admin1(data.id_) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس اداري ☑️_', 0, "md")
-   end
-		table.remove(_config.admins, nameid)
-		save_config()
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من الاداره ☑️_', 0, "md")
-end
-    if cmd == "رفع مطور" then
-if mohammed_sudo(tonumber(data.id_)) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد مطور ☑️_', 0, "md")
-   end
-          table.insert(_config.sudo_users, tonumber(data.id_))
-		save_config()
-     reload_plugins(true)
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم ترقيته ليصبح مطور ☑️_', 0, "md")
-end
-    if cmd == "تنزيل مطور" then
-     if not mohammed_sudo(data.id_) then
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ انه بالتأكيد ليس مطور ☑️_', 0, "md")
-   end
-          table.remove(_config.sudo_users, getindex( _config.sudo_users, tonumber(data.id_)))
-		save_config()
-     reload_plugins(true) 
-        return tdcli.sendMessage(arg.chat_id, "", 0, '🌟| _العضو_ ['..user_name..'] \n🌟| _الايدي_ *['..data.id_..']*\n🌟|_ تم تنزيله من المطورين ☑️_', 0, "md")
-   end
-else
-  return tdcli.sendMessage(arg.chat_id, "", 0, "_🌟| لا يوجد _", 0, "md")
-   end
-end
-
-local function pre_process(msg)
-	if msg.to.type ~= 'pv' then
-		local data = load_data(_config.moderation.data)
-		local gpst = data[tostring(msg.to.id)]
-		local chex = redis:get('CheckExpire::'..msg.to.id)
-		local exd = redis:get('ExpireDate:'..msg.to.id)
-		if gpst and not chex and msg.from.id ~= SUDO and not is_sudo(msg) then
-			redis:set('CheckExpire::'..msg.to.id,true)
-			redis:set('ExpireDate:'..msg.to.id,true)
-			redis:setex('ExpireDate:'..msg.to.id, 86400, true)
-				tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟|_تم دعم المجموعه لمده يوم واحد يرجى التحدث مع مطوري لتجديد الوقت_', 1, 'md')
-		end
-		if chex and not exd and msg.from.id ~= SUDO and not is_sudo(msg) then
-local text1 = '🌟| اشتراك المجموعه انتهى⌚️ \n🌟| '..msg.to.title..'\n\nID:  <code>'..msg.to.id..'</code>\nاذا ترید البوت ان یترک المجموعه نفذ هذا الامر التالي\n\nغادر + '..msg.to.id..'\nلدخول هذا المجموعه اتبع الامر :🛡:\nدخول + '..msg.to.id..'\n_________________\nعندما ترید تفعيل الاشتراك في المجموعه اتبع الامر الاتي :⌚️...\n\n<b>للاشتراك لمدة شهر:</b>\nالاشتراك 1 '..msg.to.id..'\n\n<b>للاشتراك لمدة 3 اشهر:</b>\nالاشتراك 2 '..msg.to.id..'\n\n<b>للاشتراك بدون حدود👨🏻⌚️☑️:</b>\nالاشتراك 3 '..msg.to.id
-local text2 = '🌟| الاشتراك في هذه المجموعه انتهى \n🌟| سیخرج البوت تلقائيامن المجموعه \n🌟| لتفعيل الاشتراك مجددا راسل المطور @lBOSSl.'
-				tdcli.sendMessage(SUDO, 0, 1, text1, 1, 'html')
-				tdcli.sendMessage(msg.to.id, 0, 1, text2, 1, 'html.')
-			botrem(msg)
-		else
-			local expiretime = redis:ttl('ExpireDate:'..msg.to.id)
-			local day = (expiretime / 86400)
-			if tonumber(day) > 0.208 and not is_sudo(msg) and is_mod(msg) then
-				warning(msg)
-			end
-	end
-	if msg.adduser and msg.adduser == tonumber(our_id) then
-local rsala = [[🌟| مرحبا انا بوت اسمي الزعيم🎖
-🌟| اختصاصي حمايه كروبات
-🌟|من السبام والوسائط والتكرار والخ ...
-🌟|  للاستفسار : @lBOSSl]]
-tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil,"data/photo/th3boss.jpg",rsala,dl_cb,nil)
-       
-end
-	end
-end
-
-local function run(msg, matches)
- if tonumber(msg.from.id) == SUDO then
-if matches[1] == "تنظيف البوت" then
-     run_bash("rm -rf ~/.telegram-cli/data/sticker/*")
-     run_bash("rm -rf ~/.telegram-cli/data/photo/*")
-     run_bash("rm -rf ~/.telegram-cli/data/animation/*")
-     run_bash("rm -rf ~/.telegram-cli/data/video/*")
-     run_bash("rm -rf ~/.telegram-cli/data/audio/*")
-     run_bash("rm -rf ~/.telegram-cli/data/voice/*")
-     run_bash("rm -rf ~/.telegram-cli/data/temp/*")
-     run_bash("rm -rf ~/.telegram-cli/data/thumb/*")
-     run_bash("rm -rf ~/.telegram-cli/data/document/*")
-     run_bash("rm -rf ~/.telegram-cli/data/profile_photo/*")
-     run_bash("rm -rf ~/.telegram-cli/data/encrypted/*")
-    return "*🌟|تم حذف الذاكره المؤقته في التيجي*"
-   end
-if matches[1] == "رفع مطور" then
-if not matches[2] and msg.reply_id then
-    tdcli_function ({
-      ID = "GetMessage",
-      chat_id_ = msg.to.id,
-      message_id_ = msg.reply_id
-    }, action_by_reply, {chat_id=msg.to.id,cmd="رفع مطور"})
-  end
-  if matches[2] and string.match(matches[2], '^%d+$') then
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = matches[2],
-  }, action_by_id, {chat_id=msg.to.id,user_id=matches[2],cmd="رفع مطور"})
-    end
-  if matches[2] and not string.match(matches[2], '^%d+$') then
-   tdcli_function ({
-      ID = "SearchPublicChat",
-      username_ = matches[2]
-    }, action_by_username, {chat_id=msg.to.id,username=matches[2],cmd="رفع مطور"})
-      end
-   end
-if matches[1] == "تنزيل مطور" then
-if not matches[2] and msg.reply_id then
-    tdcli_function ({
-      ID = "GetMessage",
-      chat_id_ = msg.to.id,
-      message_id_ = msg.reply_id
-    }, action_by_reply, {chat_id=msg.to.id,cmd="تنزيل مطور"})
-  end
-  if matches[2] and string.match(matches[2], '^%d+$') then
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = matches[2],
-  }, action_by_id, {chat_id=msg.to.id,user_id=matches[2],cmd="تنزيل مطور"})
-    end
-  if matches[2] and not string.match(matches[2], '^%d+$') then
-   tdcli_function ({
-      ID = "SearchPublicChat",
-      username_ = matches[2]
-    }, action_by_username, {chat_id=msg.to.id,username=matches[2],cmd="تنزيل مطور"})
-      end
-   end
-end
-if is_sudo(msg) then
-if matches[1] == 'غادر' and matches[2] then
-				tdcli.sendMessage(matches[2], 0, 1, '🌟| تم تنفيذ امر المطور سیخرج البوت من المجموعه📩 \n لمزید من التعلیمات تواصل مع المطور ☑️', 1, 'md')
-				tdcli.changeChatMemberStatus(matches[2], our_id, 'Left', dl_cb, nil)
-				tdcli.sendMessage(SUDO, msg.id_, 1, 'تم ضبط الخروج  '..matches[2]..' ', 1,'md')
-			botrem(msg)
-
-		end
-if matches[1]:lower() == 'شحن'  and matches[2] and matches[3] then
-		if string.match(matches[2], '^-%d+$') then
-			if tonumber(matches[3]) > 0 and tonumber(matches[3]) < 1001 then
-				local extime = (tonumber(matches[3]) * 86400)
-				redis:setex('ExpireDate:'..matches[2], extime, true)
-				if not redis:get('CheckExpire::'..msg.to.id) then
-					redis:set('CheckExpire::'..msg.to.id,true)
-				end
-					tdcli.sendMessage(SUDO, 0, 1, '🌟| وقت تفعيل المجموعة '..matches[2]..'🌟| الوقت المقدر  '..matches[3]..' 🌟| وقت التفعيل', 1, 'md')
-					tdcli.sendMessage(matches[2], 0, 1, 'تم تنفيذ امر المطور البوت بالمدة ⌚️☑️ `'..matches[3]..'` تم دعم یوم🛡 \n لمشاهده وقت دعم البوت ارسل الاشتراك  🗣⚒...',1 , 'md')
-			else
-					tdcli.sendMessage(msg.to.id, msg.id_, 1, 'من 1 الى 1000 فقط', 1, 'md')
-			end
-		end
-end
-	
-if matches[1]:lower() == 'اضافه' and matches[2] then
-    local function adduser(ex, data)
-        --	tdcli.addChatMember(msg.to.id, data.id_ , 0, dl_cb, nil)
-        	tdcli.sendMessage(msg.chat_id_, 0, 1, '🌟| تم اضافه العضو : '..data.first_name_, 1, 'html')
-        end
-    return   tdcli_function ({ID = "SearchPublicChat",username_ = matches[2]}, adduser)
-
-end
-		
-if matches[1]:lower() == 'حفظ ملف' and matches[2] then
-		if msg.reply_id  then
-			local folder = matches[2]
-            function get_filemsg(arg, data)
-				function get_fileinfo(arg,data)
-                    if data.content_.ID == 'MessageDocument' or data.content_.ID == 'MessagePhoto' or data.content_.ID == 'MessageSticker' or data.content_.ID == 'MessageAudio' or data.content_.ID == 'MessageVoice' or data.content_.ID == 'MessageVideo' or data.content_.ID == 'MessageAnimation' then
-                        if data.content_.ID == 'MessageDocument' then
-							local doc_id = data.content_.document_.document_.id_
-							local filename = data.content_.document_.file_name_
-                            local pathf = tcpath..'/data/document/'..filename
-							local cpath = tcpath..'/data/document'
-                            if file_exi(filename, cpath) then
-                                local pfile = folder
-                                os.rename(pathf, pfile)
-                                file_dl(doc_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>🌟| الملف</b> <code>'..folder..'</code> <b>🌟| تم حفظ الملف بنجاح</b>', 1, 'html')
-
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟| خطا في العثور على الملف حاول مره اخره ', 1, 'md')
-                            end
-						end
-						if data.content_.ID == 'MessagePhoto' then
-							local photo_id = data.content_.photo_.sizes_[2].photo_.id_
-							local file = data.content_.photo_.id_
-                            local pathf = tcpath..'/data/photo/'..file..'_(1).jpg'
-							local cpath = tcpath..'/data/photo'
-                            if file_exi(file..'_(1).jpg', cpath) then
-                                local pfile = folder
-                                os.rename(pathf, pfile)
-                                file_dl(photo_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>🌟| الصوره</b> <code>'..folder..'</code> <b>🌟| تم حفظها</b>', 1, 'html')
-
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '_الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-                            end
-						end
-		                if data.content_.ID == 'MessageSticker' then
-							local stpath = data.content_.sticker_.sticker_.path_
-							local sticker_id = data.content_.sticker_.sticker_.id_
-							local secp = tostring(tcpath)..'/data/sticker/'
-							local ffile = string.gsub(stpath, '-', '')
-							local fsecp = string.gsub(secp, '-', '')
-							local name = string.gsub(ffile, fsecp, '')
-                            if file_exi(name, secp) then
-                                local pfile = folder
-                                os.rename(stpath, pfile)
-                                file_dl(sticker_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>ملسق</b> <code>'..folder..'</code> <b>تمت عملية الحفظ</b>', 1, 'html')
-
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟| _الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-                            end
-						end
-						if data.content_.ID == 'MessageAudio' then
-						local audio_id = data.content_.audio_.audio_.id_
-						local audio_name = data.content_.audio_.file_name_
-                        local pathf = tcpath..'/data/audio/'..audio_name
-						local cpath = tcpath..'/data/audio'
-							if file_exi(audio_name, cpath) then
-								local pfile = folder
-								os.rename(pathf, pfile)
-								file_dl(audio_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>🌟| صوت</b> <code>'..folder..'</code> <b>🌟| تم حفظ الصوت</b>', 1, 'html')
-
-							else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟| _الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-							end
-						end
-						if data.content_.ID == 'MessageVoice' then
-							local voice_id = data.content_.voice_.voice_.id_
-							local file = data.content_.voice_.voice_.path_
-							local secp = tostring(tcpath)..'/data/voice/'
-							local ffile = string.gsub(file, '-', '')
-							local fsecp = string.gsub(secp, '-', '')
-							local name = string.gsub(ffile, fsecp, '')
-                            if file_exi(name, secp) then
-                                local pfile = folder
-                                os.rename(file, pfile)
-                                file_dl(voice_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>صوت</b> <code>'..folder..'</code> <b>🌟|تم حفظ الصوت.</b>', 1, 'html')
-
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟| _الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-                            end
-						end
-						if data.content_.ID == 'MessageVideo' then
-							local video_id = data.content_.video_.video_.id_
-							local file = data.content_.video_.video_.path_
-							local secp = tostring(tcpath)..'/data/video/'
-							local ffile = string.gsub(file, '-', '')
-							local fsecp = string.gsub(secp, '-', '')
-							local name = string.gsub(ffile, fsecp, '')
-                            if file_exi(name, secp) then
-                                local pfile = folder
-                                os.rename(file, pfile)
-                                file_dl(video_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>فيديو</b> <code>'..folder..'</code> <b>تم حفضه بنجاح</b>', 1, 'html')
-
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '_الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-                            end
-						end
-						if data.content_.ID == 'MessageAnimation' then
-							local anim_id = data.content_.animation_.animation_.id_
-							local anim_name = data.content_.animation_.file_name_
-                            local pathf = tcpath..'/data/animation/'..anim_name
-							local cpath = tcpath..'/data/animation'
-                            if file_exi(anim_name, cpath) then
-                                local pfile = folder
-                                os.rename(pathf, pfile)
-                                file_dl(anim_id)
-									tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>صورة متحركة</b> <code>'..folder..'</code> <b>تم حفظها بنجاح</b>', 1, 'html')
-                            else
-									tdcli.sendMessage(msg.to.id, msg.id_, 1, '_الملف المطلوب لا یوجد رجاََ ارسل الملف من جدید📩_', 1, 'md')
-
-                            end
-						end
-                    else
-                        return
-                    end
-                end
-                tdcli_function ({ ID = 'GetMessage', chat_id_ = msg.chat_id_, message_id_ = data.id_ }, get_fileinfo, nil)
-            end
-	        tdcli_function ({ ID = 'GetMessage', chat_id_ = msg.chat_id_, message_id_ = msg.reply_to_message_id_ }, get_filemsg, nil)
-        end
-    end
-    
-end
-
-if msg.to.type == 'channel' or msg.to.type == 'chat' then
-if matches[1] == 'شحن' and matches[2] and not matches[3] and is_sudo(msg) then
-if tonumber(matches[2]) > 0 and tonumber(matches[2]) < 1001 then
-local extime = (tonumber(matches[2]) * 86400)
-redis:setex('ExpireDate:'..msg.to.id, extime, true)
-if not redis:get('CheckExpire::'..msg.to.id) then
-redis:set('CheckExpire::'..msg.to.id)
-end
-tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟|تم شحن الاشتراك ل [<code>'..matches[2]..'</code>] يوم ⌚️', 1, 'html')
-tdcli.sendMessage(SUDO, 0, 1, ' 🌟|تم تمديد فترة الاشتراك لـ[<code>'..matches[2]..'</code>].\n 🌟| في المجموعة [<code>'..msg.to.title..'</code>]', 1, 'html')
-else
-tdcli.sendMessage(msg.to.id, msg.id_, 1, '_ اختر من 1 الى 1000 فقط ⌚️    ._', 1, 'md')
-end
-end
-
-if matches[1]:lower() == 'الاشتراك' and is_mod(msg) and not matches[2] then
-local expi = redis:ttl('ExpireDate:'..msg.to.id)
-if expi == -1 then
-return	tdcli.sendMessage(msg.to.id, msg.id_, 1, '_المجموعة مفعله مدى الحياة⌚️_', 1, 'md')
-else
-local day = math.floor(expi / 86400) + 1
-	if day == 1 then
-	day = 'يوم واحد' 
-	elseif day == 2 then
-   	day = 'يومين'
-	elseif day == 3 then
-   	day = '3 ايام'
-   	else
-	day = day..' يوم'
-end
-return tdcli.sendMessage(msg.to.id, msg.id_, 1, '🌟| باقي '..day..' وينتهي اشتراك البوت 💯', 1, 'md')
-end
-end
-
-if matches[1] == 'الاشتراك' and is_mod(msg) and matches[2] then
-if string.match(matches[2], '^-%d+$') then
-local expi = redis:ttl('ExpireDate:'..matches[2])
-if expi == -1 then
-tdcli.sendMessage(msg.to.id, msg.id_, 1, '_المجموعة مفعله مدى الحياة⌚️_', 1, 'md')
-else
-local day = math.floor(expi / 86400 ) + 1
-	if day == 1 then
-	day = 'يوم واحد' 
-	elseif day == 2 then
-   	day = 'يومين'
-	elseif day == 3 then
-   	day = '3 ايام'
-   	else
-	day = day..' يوم'
-end
-tdcli.sendMessage(msg.to.id, msg.id_, 1, day..'مدة تفعيل المجموعة.', 1, 'md')
-end
-end
-end
-	
-if matches[1] == "رفع اداري" and is_sudo(msg) then
-if not matches[2] and msg.reply_id then
-    tdcli_function ({
-      ID = "GetMessage",
-      chat_id_ = msg.to.id,
-      message_id_ = msg.reply_id
-    }, action_by_reply, {chat_id=msg.to.id,cmd="رفع اداري"})
-  end
-  if matches[2] and string.match(matches[2], '^%d+$') then
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = matches[2],
-  }, action_by_id, {chat_id=msg.to.id,user_id=matches[2],cmd="رفع اداري"})
-    end
-  if matches[2] and not string.match(matches[2], '^%d+$') then
-   tdcli_function ({
-      ID = "SearchPublicChat",
-      username_ = matches[2]
-    }, action_by_username, {chat_id=msg.to.id,username=matches[2],cmd="رفع اداري"})
-      end
-   end
-if matches[1] == "تنزيل اداري" and is_sudo(msg) then
-if not matches[2] and msg.reply_id then
-    tdcli_function ({
-      ID = "GetMessage",
-      chat_id_ = msg.to.id,
-      message_id_ = msg.reply_to_message_id_
-    }, action_by_reply, {chat_id=msg.to.id,cmd="تنزيل اداري"})
-  end
-  if matches[2] and string.match(matches[2], '^%d+$') then
-tdcli_function ({
-    ID = "GetUser",
-    user_id_ = matches[2],
-  }, action_by_id, {chat_id=msg.to.id,user_id=matches[2],cmd="تنزيل اداري"})
-    end
-  if matches[2] and not string.match(matches[2], '^%d+$') then
-    tdcli_function ({
-      ID = "SearchPublicChat",
-      username_ = matches[2]
-    }, action_by_username, {chat_id=msg.to.id,username=matches[2],cmd="تنزيل اداري"})
-      end
-   end
-if matches[1] == 'صنع مجموعه' and is_admin(msg) then
-local text = matches[2]
-tdcli.createNewGroupChat({[0] = msg.from.id}, text, dl_cb, nil)
-return '_🌟| تـم أنـشـاء الـمـجـوعـه ☑️_'
-end
-if matches[1] == 'ترقيه سوبر' and is_admin(msg) then
-local text = matches[2]
-tdcli.createNewChannelChat(text, 1, '', dl_cb, nil)
-return '_🌟| تـم تـرقـيـه الـمـجـوعـه ☑️_'
-end
-if matches[1] == 'سوبر كروب' and is_admin(msg) then
-local id = msg.to.id
-tdcli.migrateGroupChatToChannelChat(id, dl_cb, nil)
-return '_🌟| تـم تـرقـيـه الـمـجـوعـه ☑️_'
-end
-if matches[1] == 'دخول' and is_admin(msg) then
-tdcli.importChatInviteLink(matches[2])
-return '*تم !*'
-end
-if matches[1] == 'اسم البوت' and is_sudo(msg) then
-tdcli.changeName(matches[2])
-return '*🌟| تم تغيير اسم البوت \n🌟| الاسم الجديد : *'..matches[2]..'*'
-end
-if matches[1] == 'معرف البوت' and is_sudo(msg) then
-tdcli.changeUsername(matches[2])
-return '*➿¦ تم تعديل معرف البوت *\n* 🌟| المعرف الجديد :* @'..matches[2]..''
-end
-if matches[1] == 'مسح معرف البوت' and is_sudo(msg) then
-tdcli.changeUsername('')
-return '*تم !*'
-end
-if matches[1] == 'تفعيل' and is_sudo(msg) then
-if matches[2] == 'الماركدوان'then
-redis:set('markread','on')
-return '_تم تفعيل الماركدوان  🌟|_'
-end
-if matches[2] == 'الخروج التلقائي' then
-local hash = 'auto_leave_bot'
---Enable Auto Leave
-    redis:del(hash)
-   return '🌟| _تم تفعيل الخروج التلقائي_'
-end
-end
-if matches[1] == 'تعطيل' then
-if matches[2] == 'الماركدوان' and is_sudo(msg) then
-redis:set('markread','off')
-return '_تم تعطيل الماركدوان  🌟|_'
-   end
-if matches[2] == 'الخروج التلقائي' then
-local hash = 'auto_leave_bot'
-redis:set(hash, true)
-return '🌟| _تم تعطيل الخروج التلقائي_'
-end
-end
-if matches[1] == 'نشر' and is_admin(msg) then
-local text = matches[2]
-tdcli.sendMessage(matches[3], 0, 0, text, 0)	end
-if matches[1] == 'اذاعه' and is_sudo(msg) then		
-local data = load_data(_config.moderation.data)		
-local bc = matches[2]			
-for k,v in pairs(data) do				
-tdcli.sendMessage(k, 0, 0, bc, 0)			
-end	
-end
-if is_sudo(msg) then
-if matches[1]:lower() == "ارسل ملف" and matches[2] and matches[3] then
-		local send_file = "./"..matches[2].."/"..matches[3]
-		tdcli.sendDocument(msg.chat_id_, msg.id_,0, 1, nil, send_file, '@lBOSSl', dl_cb, nil)
-	end
-
-if matches[1]:lower() == 'الاشتراك' and matches[2] == '1' and not matches[3] then
-			local timeplan1 = 2592000
-			redis:setex('ExpireDate:'..msg.to.id, timeplan1, true)
-			if not redis:get('CheckExpire::'..msg.to.id) then
-				redis:set('CheckExpire::'..msg.to.id,true)
-			end
-tdcli.sendMessage(SUDO, msg.id, 1, '🌟| تم تفعيل المجموعة [<code>'..msg.to.title..'</code>]\n🌟|الاشتراك : شهر واحد 🛠 )', 1, 'html')
-tdcli.sendMessage(msg.to.id, 0, 1, '🌟| تم تفعیل المجموعه ستبقی صالحة الی 30 یوم⌚️', 1, 'md')
-		end
-if matches[1]:lower() == 'الاشتراك' and matches[2] == '2' and not matches[3] then
-			local timeplan2 = 7776000
-			redis:setex('ExpireDate:'..msg.to.id,timeplan2,true)
-			if not redis:get('CheckExpire::'..msg.to.id) then
-				redis:set('CheckExpire::'..msg.to.id,true)
-			end
-tdcli.sendMessage(SUDO, msg.id, 1, '🌟| تم تفعيل المجموعة [<code>'..msg.to.title..'</code>]\n🌟| الاشتراك : 3 اشهر 🛠 )', 1, 'html')
-tdcli.sendMessage(msg.to.id, 0, 1, '🌟| تم تفعيل البوت بنجاح وصلاحيته لمدة 90 يوم  )', 1, 'md')
-		end
-if matches[1]:lower() == 'الاشتراك' and matches[2] == '3' and not matches[3] then
-			redis:set('ExpireDate:'..msg.to.id,true)
-			if not redis:get('CheckExpire::'..msg.to.id) then
-				redis:set('CheckExpire::'..msg.to.id,true)
-			end
-tdcli.sendMessage(SUDO, msg.id_,1, '🌟| تم تفعيل المجموعة [<code>'..msg.to.title..'</code>]\n🌟| الاشتراك : مدى الحياه', 1, 'html')
-tdcli.sendMessage(msg.to.id, 0, 1, '🌟| تم تفعيل البوت بنجاح وصلاحيته مدى الحياه )', 1, 'md')
-		end
-end
-if matches[1]:lower() == 'حفظ' and matches[2] and is_sudo(msg) then
-        if tonumber(msg.reply_to_message_id_) ~= 0  then
-            function get_filemsg(arg, data)
-                function get_fileinfo(arg,data)
-                    if data.content_.ID == 'MessageDocument' then
-                        fileid = data.content_.document_.document_.id_
-                        filename = data.content_.document_.file_name_
-                        if (filename:lower():match('.lua$')) then
-                            local pathf = tcpath..'/data/document/'..filename
-                            if pl_exi(filename) then
-                                local pfile = 'plugins/'..matches[2]..'.lua'
-                                os.rename(pathf, pfile)
-                                tdcli.downloadFile(fileid , dl_cb, nil)
-                                tdcli.sendMessage(msg.to.id, msg.id_,1, '<b>الاضافه</b> <code>'..matches[2]..'</code> <b>تم حفظها.</b>', 1, 'html')
-                            else
-                                tdcli.sendMessage(msg.to.id, msg.id_, 1, '_هناك خطا حاول لاحقا _', 1, 'md')
-                            end
-                        else
-                            tdcli.sendMessage(msg.to.id, msg.id_, 1, '_هذا الملف ليس بصيغه lua _', 1, 'md')
-                        end
-                    else
-                        return
-                    end
-                end
-                tdcli_function ({ ID = 'GetMessage', chat_id_ = msg.chat_id_, message_id_ = data.id_ }, get_fileinfo, nil)
-            end
-	        tdcli_function ({ ID = 'GetMessage', chat_id_ = msg.chat_id_, message_id_ = msg.reply_to_message_id_ }, get_filemsg, nil)
-        end
-    end
-if matches[1] == 'المطورين' and is_sudo(msg) then
-return sudolist(msg)
-    end
-if matches[1] == 'المجموعات' and is_admin(msg) then
-return chat_list(msg)
-    end
-
-if matches[1] == 'تعطيل' and string.match(matches[2], '^-%d+$') and is_admin(msg) then
-    local data = load_data(_config.moderation.data)
-			-- Group configuration removal
-			data[tostring(matches[2])] = nil
-			save_data(_config.moderation.data, data)
-			local groups = 'groups'
-			if not data[tostring(groups)] then
-				data[tostring(groups)] = nil
-				save_data(_config.moderation.data, data)
-			end
-			data[tostring(groups)][tostring(matches[2])] = nil
-			save_data(_config.moderation.data, data)
-	   tdcli.sendMessage(matches[2], 0, 1, "تم ايقاف البوت من قبل المطور ", 1, 'html')
-    return '_المجموعه_ *'..matches[2]..'* _تم تعطيلها_'
-		end
-if matches[1] == 'المطور' then
- tdcli.sendMessage(msg.to.id, msg.id, 1, _config.info_text, 1, 'html')
-    end
-if matches[1] == 'الاداريين' and is_admin(msg) then
-return adminlist(msg)
-    end
-if matches[1] == 'زعيم غادر' and is_admin(msg) then
-  tdcli.sendMessage(msg.to.id, msg.id, 1, 'اوك باي 😢💔💯', 1, 'html')
-  tdcli.changeChatMemberStatus(msg.to.id, our_id, 'Left', dl_cb, nil)
-  			botrem(msg)
-
-end   
-if matches[1] == 'الخروج التلقائي' and is_admin(msg) then
-    local hash = 'auto_leave_bot'
-      if not redis:get(hash) then
-   return 'مفعل'
-       else
-   return 'معطل'
-         end
-   end
-   if matches[1] == "كشف الادمن" and not matches[2] and is_owner(msg) then
-    local checkmod = false
-tdcli.getChannelMembers(msg.to.id, 0, 'Administrators', 200, function(a, b)
-local secchk = true
-for k,v in pairs(b.members_) do
-if v.user_id_ == tonumber(our_id) then
-secchk = false
-end
-end
-if secchk then
-return tdcli.sendMessage(msg.to.id, msg.id, 1, '🌟| كلا البوت ليس ادمن في المجموعة ♨️', 1, "md")
-else
-return tdcli.sendMessage(msg.to.id, msg.id, 1, '🌟| نعم انه ادمن في المجموعة 👍🏿', 1, "md")
-		end
-	end, nil)
-end
-   
-if is_sudo(msg) and  matches[1] == "راسل" then
-if matches[2] and string.match(matches[2], '@[%a%d]') then
-local function rasll (extra, result, success)
-if result.id_ then
-if result.type_.user_.username_ then
-user_name = '@'..check_markdown(result.type_.user_.username_)
-else
-user_name = check_markdown(result.first_name_)
-end
-tdcli.sendMessage(msg.chat_id_, 0, 1, '🗯 تم ارسال الرسالة لـ ['..user_name..'] 👍🏿💯' , 1, 'md')
-tdcli.sendMessage(result.id_, 0, 1, extra.msgx, 1, 'html')
-end
-end
-return   tdcli_function ({ID = "SearchPublicChat",username_ = matches[2]}, rasll, {msgx=matches[3]})
-elseif matches[2] and string.match(matches[2], '^%d+$') then
-tdcli.sendMessage(msg.to.id, 0, 1, '🗯 تم ارسال الرسالة لـ ['..matches[2]..'] 👍🏿💯' , 1, 'html')
-tdcli.sendMessage(matches[2], 0, 1, matches[3], 1, 'html')
-end
-end
-if matches[1] == "=" and is_sudo(msg) then
-    if msg.from.username then
+local w = matches[1]
+local ww = matches[2]
+local r3 = matches[3]
+local r4 = matches[4]
+local name_user = string.sub(msg.from.first_name:lower(),0,60) 
+local data = load_data(_config.moderation.data)
+if msg.from.username then
 usernamex = "@"..(msg.from.username or "---")
-member = "@"..(msg.from.username or "---")
 else
-usernamex = "ما مسوي  😹💔"
-member = name_user
-end
-local rsala = [[🌟| مرحبا انا بوت اسمي الزعيم🎖
-🌟| اختصاصي حمايه كروبات
-🌟|من السبام والوسائط والتكرار والخ ...
-🌟|  للاستفسار : @lBOSSl]]
-
-tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil,"data/photo/th3boss.jpg",rsala,dl_cb,nil)
---tdcli.sendForwarded(reply_id, 0, 0, 1, nil, msg.chat_id_, msg.from.id)
---forwardMessage(user,msg.chat.id,msg.message_id)
-
---tdcli.sendAnimation(msg.to.id, 0, 0, 1, nil, "data/photo/bos.mp4", nil, nil, 'مح 💋')  
---tdcli.sendMessage(msg.to.id, 0, 1,text1, 0, "html")    
---tdcli.sendVoice(msg.chat_id_, 0, 0, 1, nil, 'data/aml_mnk.ogg', nil, nil, 'امل منك اصد عنك 🎙🔊')
---tdcli.sendContact(msg.chat_id_, 0, 0, 1, nil, '+964 781 848 7465' , 'محمد هشام', '', 60809019)
---tdcli.sendSticker(msg.chat_id_, 0, 0, 1, nil, 'BQADAgADqQcAAm4y2AAB_DXqQNkDDWYC' )
---tdcli.forwardMessages(msg.chat_id_, msg.from.id, {[0] =  msg.id }, 0)
---tdcli.getStickers('😂')
-
---return tdcli.sendVideo(msg.to.id, msg.id, 0, 0, 0, "/verbot/data/video/fun.mp4", nil, nil, nil, "dsf")
+usernamex = "️ ما مسوي  😹💔 "
 end
 
-if matches[1] == "مواليدي" then
-local kyear = tonumber(os.date("%Y"))
-local kmonth = tonumber(os.date("%m"))
-local kday = tonumber(os.date("%d"))
---
-local agee = kyear - matches[2]
-local ageee = kmonth - matches[3]
-local ageeee = kday - matches[4]
+--------------[data function to save rdod ]---------------
+if data[tostring(msg.to.id)] then
+if data[tostring(msg.to.id)]['settings'] then
+local settings = data[tostring(msg.to.id)]['settings'] 
+if data[tostring(msg.to.id)]['settings']['replay'] then
+ lock_reply = data[tostring(msg.to.id)]['settings']['replay']  
+ elseif not data[tostring(msg.to.id)]['settings']['replay'] then
+ lock_reply = "☑️"
+end end end
 
-return  " 👮🏼 مرحبا عزيزي"
-.."\n👮🏼 لقد قمت بحسب عمرك 💯  \n\n"
-
-.."🌟| "..agee.." سنه\n"
-.."🌟| "..ageee.." اشهر \n"
-.."🌟| "..ageeee.." يوم \n\n"
-
+---------------[End Function data] -----------------------
+ if w=="رد" then
+ if not is_owner(msg) then
+     return"🌟| للمدراء فقط ! 🗣"
+     end
+     
+  if ww == 'مسح الكل' then
+if next(data[tostring(msg.to.id)]['replay']) == nil then
+return  " عذراً 🌝".. ":{" ..msg.from.first_name.. "}:".."\n".."\n".." 🗯قائمة الردود فارغة بالفعل 🗣 "
+else
+for k,v in pairs(data[tostring(msg.to.id)]['replay']) do
+data[tostring(msg.to.id)]['replay'][tostring(k)] = nil
+save_data(_config.moderation.data, data)
+end
+    return "☑️️ تم مسح كل الردود 🚀"
+end
 end
 
-
-if matches[1] == "الاوامر" then
-if not is_mod(msg) then return "🌟| للاداريين فقط 🎖" end
-return 'مـرحـ(👋)ـبـا يـا '..msg.from.first_name..'\n'..[[
-الاوامـر الـ؏ـامـة
-✥-----------------⚜✮⚜-----------------✥
-🌟| م1 ➙ اوامر الادارة
-🌟| م2 ➙ اوامر اعدادات المجموعه
-🌟| م3 ➙ اوامر الحـمـايـة
-🌟| م4 ➙ الاوامـر الـ؏ـامـة
-🌟| م المطور ➙ اوامر المطور
-🌟| اوامر الرد ➙ لاضافه رد معين
-
-❖••••••••••••••⚜❂⚜••••••••••••••❖
-راسلني للاستفسار 💡↭ @lBOSSl
-]]
+  if ww == 'اضف' then
+ data[tostring(msg.to.id)]['replay'][r3] = r4
+save_data(_config.moderation.data, data)
+ return '('..r3..')\n  ☑️️ تم اضافت الرد 🚀 '
+ 
+elseif ww == 'مسح' then
+if not data[tostring(msg.to.id)]['replay'][r3] then
+return '🗯هذا الرد ليش مضاف في قائمه الردود 🗣'
+else
+data[tostring(msg.to.id)]['replay'][r3] = nil
+save_data(_config.moderation.data, data)
+return '('..r3..')\n  ☑️️ تم مسح الرد 🚀 '
+end
+end
 end
 
-if matches[1]== 'م1' then
-if not is_mod(msg) then return "🌟| للاداريين فقط 🎖" end
-return [[
-🎖  اوامر الرفع والتنزيل📍
-✥-----------------⚜️✮⚜️-----------------✥
-
-🌟| رفع ادمن : لرفع ادمن في البوت
-🌟| تنزيل ادمن : لتنزيل ادمن من البوت
-🌟| رفع عضو مميز : لرفع عضو مميز في البوت
-🌟| تنزيل عضو مميز : لتنزيل عضو مميز من البوت
-🌟| الادمنيه : لعرض قائمة الادمنيه
-🌟| الاداريين : لعرض قائمة الاداريين
-
-✥-----------------⚜️✮⚜️-----------------✥
-💬 اوامر الطرد والحضر 🀄️
-
-🌟| بلوك بالرد : لطرد العضو من المجموعه
-🌟| حظر : لحظر وطرد عضو من المجموعه 
-🌟| الغاء الحظر : لالغاء الحظر عن عضو 
-🌟| منع : لمنع كلمه داخل المجموعه
-🌟| الغاء منع : لالغاء منع الكلمه  
-🌟| كتم  : لكتم عضو بواسطة الرد
-🌟| الغاء الكتم  : لالغاء الكتم بواسطة الرد
-
-✥-----------------⚜️✮⚜️-----------------✥
-راسلني للاستفسار 💡↭ @lBOSSl
-]]
+  if w == 'الردود' then
+if next(data[tostring(msg.to.id)]['replay']) ==nil then
+return '🌟| لايوجد ردود مضافه حاليا ❗️'
+else
+local i = 1
+local message = '🌟| ردود البوت في المجموعه  🗣\n\n'
+for k,v in pairs(data[tostring(msg.to.id)]['replay']) do
+message = message ..i..' - '..k..' [' ..v.. '] \n'
+i = i + 1
+end
+return message
 end
 
-if matches[1]== 'م2' then
-if not is_mod(msg) then return "🌟| للاداريين فقط 🎖" end
-return [[
-🌟| اوامر الوضع للمجموعه 🀄️
-✥-----------------⚜️✮⚜️-----------------✥
-
-🌟| ضع الترحيب + الكلمه  :↜ لوضع ترحيب  
-🌟| ضع قوانين :↜ لوضع قوانين 
-🌟| ضع وصف :↜ لوضع وصف  
-🌟| ضـع رابط :↜ لوضع الرابط  
-🌟| الـرابـط  خاص :↜  لارسال الرابط  خاص
-🌟| الـرابـط :↜  لعرض الرابط  
-
-✥-----------------⚜️✮⚜️-----------------✥
-🌟| اوامر رؤية الاعدادات 🀄️
-
-🌟| القوانين : لعرض  القوانين 
-🌟| الادمنيه : لعرض  الادمنيه 
-🌟| الاداريين : لعرض  الاداريين 
-🌟| المكتومين :↜لعرض  المكتومين 
-🌟| المطور : لعرض معلومات المطور 
-🌟| معلوماتي :↜لعرض معلوماتك  
-🌟| الحمايه : لعرض اعدادات المجموعه 
-🌟| الوسائط : لعرض اعدادات الميديا 
-🌟| المجموعه : لعرض معلومات المجموعه 
-✥-----------------⚜️✮⚜️-----------------✥
-راسلني للاستفسار 💡↭ @lBOSSl
-]]
   end
+  
+-- by @MOHAMMED HISHAM
 
-if matches[1]== 'م3' then
-if not is_mod(msg) then return "🌟| للاداريين فقط 🎖" end
+
+--------------------[Test Bot]----------------------------
+if w =="تيست" then
+return "🗣 البوت شـغــال 🚀"
+elseif w == "اسمي" then
+return  "\n" ..msg.from.first_name.."\n" 
+elseif w == "معرفي" then
+return  "@"..(msg.from.username or "لايوجد").."\n" 
+elseif w == "رقمي" then
+return  "\n"..(msg.from.phone or "لايوجد").."\n" 
+elseif w == "ايديي" then
+return  "\n"..msg.from.id.."\n" 
+elseif w =="صورتي" then
+local function getpro(arg, data)
+if data.photos_[0] then
+local rank
+if is_sudo(msg) then
+rank = 'المطور مالتي 😻'
+elseif is_owner(msg) then
+rank = 'مدير المجموعه 😽'
+elseif is_admin(msg) then
+rank = ' اداري في البوت 😼'
+elseif is_mod(msg) then
+rank = ' ادمن في البوت 😺'
+else
+rank = 'مجرد عضو 😹'
+end
+tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, data.photos_[0].sizes_[1].photo_.persistent_id_,"",dl_cb,nil)
+else
+tdcli.sendMessage(msg.to.id, msg.id_, 1, "🌟|¦لا يوجد صوره في بروفايلك ...", 1, 'md')
+end end
+tdcli_function ({ID = "GetUserProfilePhotos",user_id_ = msg.from.id,offset_ = 0,limit_ = 1}, getpro, nil)
+elseif w=="اريد رابط الحذف" or w=="اريد رابط حذف" or w=="رابط حذف" or w=="رابط الحذف" then
 return [[
-⚡️ اوامر حماية المجموعه ⚡️
-
-✥-----------------⚜️✮⚜️-----------------✥
-
-🌟|️ قفل ┇ فتح :  التثبيت
-🌟|️ قفل ┇ فتح :  التعديل
-🌟|️ قفل ┇ فتح :  البصمات
-🌟|️ قفل ┇ فتح :  الــفيديو
-🌟|️ قفل ┇ فتح : الـصـوت 
-🌟|️ قفل ┇ فتح :  الـصــور 
-🌟|️ قفل ┇ فتح :  الملصقات
-🌟|️ قفل ┇ فتح :  المتحركه
-🌟|️ قفل ┇ فتح : الدردشه
-🌟|️ قفل ┇ فتح : الملصقات
-🌟|️ قفل ┇ فتح : الروابط
-🌟|️ قفل ┇ فتح : التاك
-🌟|️ قفل ┇ فتح : البوتات
-🌟|️ قفل ┇ فتح : الكلايش
-🌟|️ قفل ┇ فتح : التكرار
-🌟|️ قفل ┇ فتح :  التوجيه
-🌟|️ قفل ┇ فتح : الجهات 
-🌟|️ قفل ┇ فتح : المجموعه 
-🌟|️ قفل ┇ فتح : الــكـــل
-✥-----------------⚜️✮⚜️-----------------✥
-
-🌟|¦ تشغيل ┇ ايقاف : الترحيب 
-💬¦ تشغيل ┇ ايقاف : الردود 
-📢¦ تشغيل ┇ ايقاف : التحذير
-✥-----------------⚜️✮⚜️-----------------✥
-
-راسلني للاستفسار 💡↭ @lBOSSl
-]]
-end
-
-if matches[1]== 'م4' then
-if not is_mod(msg) then return "🌟| للاداريين فقط 🎖" end
-return [[
-📍💭 اوامر اضافيه 🔹🚀🔹
-        
-✥-----------------⚜️✮⚜️-----------------✥
-🕵🏻 معلوماتك الشخصيه 🙊
-🌟| اسمي : لعرض اسمك 🎈
-🌟| معرفي : لعرض معرفك 🎈
-🌟| ايديي : لعرض ايديك 🎈
-🌟| رقمي : لعرض رقمك  🎈
-✥-----------------⚜️✮⚜️-----------------✥
-🌟| اوامر التحشيش 😄
-🌟| تحب + (اسم الشخص)
-🌟| بوس + (اسم الشخص) 
-🌟| كول + (اسم الشخص) 
-🌟| كله + الرد + (الكلام) 
-✥-----------------⚜️✮⚜️-----------------✥
-راسلني للاستفسار 💡↭ @lBOSSl
-
-]]
-end
-
-if matches[1]== "م المطور" then
-if not is_sudo(msg) then return "🌟| للمطوين فقط 🎖" end
-return [[
-⚜️🔸 اوامر المطورين 🔹⚜️
-
-✥-----------------⚜️✮⚜️-----------------✥
-🌟| تفعيل  : لتفعيل البوت 
-🌟| تعطيل : لتعطيل البوت 
-🌟| اذاعه : لنشر كلمه 
-🌟| زعيم غادر : لطرد البوت
-🌟| صنع مجموعه : لصنع مجموعه 
-🌟| سوبر : لجعل المجموعه خارقه
-🌟| مسح الادمنيه : لمسح الادمنيه 
-🌟| مسح الاداريين : لمسح الاداريين 
-✥-----------------⚜️✮⚜️-----------------✥
-🌟| تحديث: لتحديث ملفات البوت
-
-✥-----------------⚜️✮⚜️-----------------✥
-راسلني للاستفسار 💡↭ @lBOSSl
-]]
-end
+● - رابط حذف التلي ⬇️ :
+● - احذف ولا ترجع عيش حياتك 😪💔
+● - https://telegram.org/deactivate
+]] 
+elseif w== 'ايدي' and msg.to.type == 'pv' then
+return "🌟|    ايدي البوت : "..msg.to.id.. "\n\n🌟|    ايدي حسابك : "..msg.from.id.. "\n مـطـور الـسـورس\n محمد هشام  > @TH3BOSS 🌟| "
 
 end
+------------[lock and unlock reply in pv ]---------
+    
+if (msg.to.type == "pv") and not is_sudo(msg) then
+tdcli.sendMessage(msg.to.id, 0, 1, " 🌟| Welcome My Dear\n\nTH3BOSS V17 \n\n🌟|For More Information Subscribe To The Channel @llDEV1ll \n🌟|  https://github.com/moody2020/TH3BOSS \n\n🌟| Dev :  @TH3BOSS\n\n🌟| groupmanger : @lBOSSl \n\n🌟| Channel :  @llDEV1ll ", 1, 'html')
+local pvmsg ="🌟|الاسم :"..name_user.."\n🌟|الايدي : ["..msg.from.id.."]\n🌟|المعرف : ["..usernamex.."]\n 📥الرسالة: \n\n"..msg.text
+
+tdcli.sendMessage(60809019, 0, 1, pvmsg, 1, 'md')
 
 end
+    
+--------------------------------------
 
-return { 
-patterns = {   
-"^(كشف الادمن)$", 
-"^(م المطور)$", 
-"^(الاوامر)$", 
-"^(م1)$", 
-"^(م2)$", 
-"^(م3)$", 
-"^(م4)$", 
-"^(رفع مطور)$", 
-"^(تنزيل مطور)$",
-"^(المطورين)$",
-"^(رفع مطور) (.*)$",
-"^(تنزيل مطور) (.*)$",
-"^(رفع اداري)$", 
-"^(تنزيل اداري)$",
-"^(الاداريين)$",
-"^(رفع اداري) (.*)$", 
-"^(الخروج التلقائي)$", 
-"^(المطور)$",
-"^(صنع مجموعه) (.*)$",
-"^(ترقيه سوبر) (.*)$",
-"^(سوبر كروب)$",
-"^(المجموعات)$",
-"^(تنظيف البوت)$",
-"^(تفعيل) (.*)$",
-"^(تعطيل) (.*)$",
-"^(دخول) (.*)$",
-"^(اسم البوت) (.*)$",
-"^(معرف البوت) (.*)$",
-"^(مسح معرف البوت) (.*)$",
-"^(نشر) +(.*) (.*)$",
-"^(اذاعه) (.*)$",
-"^(ارسل ملف) (.*) (.*)$",
-"^(حفظ ملف) (.*)$",
-"^(حفظ) (.*)$",
-"^(الاشتراك)$",
-"^(الاشتراك) (.*)$",
-"^(شحن) (.*) (%d+)$",
-"^(شحن) (%d+)$",
-"^(اضافه) (@[%a%d%_]+)$",
-"^(راسل) (@[%a%d%_]+) (.*)$",
-"^(راسل) (%d+) (.*)$",
-"^(زعيم غادر)$",
-"^(مواليدي) (.+)/(.+)/(.+)",
-"^(=)$",
-"^(غادر) (.*)$",
-"^(الاشتراك) ([123])$",
-"^!!tgservice (.+)$",
+if lock_reply =="☑️️" and  data[tostring(msg.to.id)]    then
 
-}, 
-run = run, pre_process = pre_process
+if ( msg.text ) and ( msg.to.type == "channel" ) or ( msg.to.type == "chat" ) then
+    ----------------------
+    -- by @MOHAMMED HISHAM
+local su = {
+"نعم حبيبي المطور 🌝❤",
+"يابعد روح زعيم 😘❤️",
+"هلا بمطوري العشق أمرني"
+  }
+local  ss97 = {
+"ها حياتي😻",
+"عيونه 👀 وخشمه 👃🏻واذانه👂🏻",
+"باقي ويتمدد 😎",
+"ها حبي 😍",
+"ها عمري 🌹",
+"اجيت اجيت كافي لتصيح 🌚👌",
+"هياتني اجيت 🌚❤️",
+"نعم حبي 😎",
+"هوه غير يسكت عاد ها شتريد 😷",
+"احجي بسرعه شتريد 😤",
+"ها يا كلبي ❤️",
+"هم صاحو عليه راح ابدل اسمي من وراكم 😡",
+"لك فداك زعيم حبيبي انت اموووح 💋",
+"دا اشرب جاي تعال غير وكت 😌",
+"كول حبيبي أمرني 😍",
+"احجي فضني شرايد ولا اصير ضريف ودكلي جرايد لو مجلات تره بايخه 😒😏",
+"اشتعلو اهل زعيم شتريد 😠",
+"بووووووووو 👻 ها ها فزيت شفتك شفتك لا تحلف 😂",
+"طالع مموجود 😒",
+"هااا شنوو اكو حاته بالكروب وصحت عليه  😍💕",
+"انت مو قبل يومين غلطت عليه؟  😒",
+"راجع المكتب حبيبي عبالك زعيم سهل تحجي ويا 😒",
+"ياعيون زعيم أمرني 😍",
+"لك دبدل ملابسي اطلع برااااا 😵😡 ناس متستحي",
+"سويت هواي شغلات سخيفه بحياتي بس عمري مصحت على واحد وكلتله انجب 😑",
+"مشغول ويا ضلعتي  ☺️",
+"مازا تريد منه 😌🍃",
+
 }
+local bs = {
+"مابوس 🌚💔",
+"اآآآم͠ــ.❤️😍ــو͠و͠و͠آ͠آ͠ح͠❤️عسسـل❤️",
+"الوجه ميساعد 😐✋",
+"ممممح😘ححح😍😍💋",
+}
+local ns = {
+"🌹 هــلــℌelℓoووات🌹عمـ°🌺°ــري🙊😋",
+"هْـٌﮩٌﮧٌ﴿🙃﴾ﮩٌـ୭ٌ୭ـْلوُّات†😻☝️",
+"هلاوو99وووات نورت/ي ❤️🙈",
+"هلووات 😊🌹",
+}
+local sh = {
+"اهلا عزيزي المطور 😽❤️",
+"هلوات . نورت مطوري 😍",
+}
+local lovs =  "اموت عليك حياتي  😍❤️"
+local  lovm = {
+"اكرهك 😒👌🏿",
+"دي 😑👊🏾",
+"اعشكك/ج مح 😍💋",
+"اي احبك/ج 😍❤️",
+"ماحبك/ج 😌🖖",
+"امـــوت فيك ☹️",
+"اذا كتلك/ج احبك/ج شراح تستفاد/ين 😕❤️",
+"ولي ماحبك/ج 🙊💔",
+}
+local thb = {
+"اموت عليه-ه 😻😻",
+"فديته-ه 😍❤️",
+"لا ماحبه-ه 🌚💔",
+"اكرهه 💔🌚",
+"يييع 😾👊🏿",
+"مادري افڱﮩﮩﮩر🐸💔"
+}
+local song = {
+"عمي يبو البار 🤓☝🏿️ \nصبلي لبلبي ترى اني سكران 😌 \n وصاير عصبي 😠 \nانه وياج يم شامه 😉 \nوانه ويــــاج يم شامه  شد شد  👏🏿👏🏿 \nعدكم سطح وعدنه سطح 😁 \n نتغازل لحد الصبح 😉 \n انه وياج يم شامه 😍 \n وانه وياج فخريه وانه وياج حمديه 😂🖖🏿\n ",
+"اي مو كدامك مغني قديم 😒🎋 هوه ﴿↜ انـِۨـۛـِۨـۛـِۨيـُِـٌِہۧۥۛ ֆᵛ͢ᵎᵖ ⌯﴾❥  ربي كامز و تكلي غنيلي 🙄😒🕷 آإرۈحُـ✯ـہ✟  😴أنــ💤ــااااام😴  اشرف تالي وكت يردوني اغني 😒☹️🚶",
+"لا تظربني لا تظرب 💃💃 كسرت الخيزارانه💃🎋 صارلي سنه وست اشهر💃💃 من ظربتك وجعانه🤒😹",
+"موجوع كلبي😔والتعب بية☹️من اباوع على روحي😢ينكسر كلبي عليه😭",
+"ايامي وياها👫اتمنا انساها😔متندم اني حيل😞يم غيري هيه💃تضحك😂عليه😔مقهور انام الليل😢كاعد امسح بل رسائل✉️وجان اشوف كل رسايلها📩وبجيت هوايه😭شفت احبك😍واني من دونك اموت😱وشفت واحد 🚶صار هسه وياية👬اني رايدها عمر عمر تعرفني كل زين🙈 وماردت لا مصلحة ولاغايه😕والله مافد يوم بايسها💋خاف تطلع🗣البوسه💋وتجيها حجايه😔️",
+ "😔صوتي بعد مت سمعه✋يال رايح بلا رجعة🚶بزودك نزلت الدمعة ذاك اليوم☝️يال حبيتلك ثاني✌روح وياه وضل عاني😞يوم اسود علية اني🌚 ذاك اليوم☝️تباها بروحك واضحك😂لان بجيتلي عيني😢😭 وافراح يابعد روحي😌خل الحركة تجويني😔🔥صوتي بعد متسمعة🗣✋",
+ 
+ 
+}
+-------reply By stickers -------
+
+local sound = {
+"data/audio/aml_mnk.ogg",
+"data/audio/mozeka.ogg"
+}
+local function sudoname(ww)
+if string.match(ww, 'محمد')  or  string.match(ww, 'حموش') or  string.match(ww, 'حموشي') or  string.match(ww, 'حمودي')  or string.match(ww, 'حماده') then
+return true
+else
+return false
+end
+end
+
+----------------------------------------------
+if is_sudo(msg) and w == "زعيم" and not ww then 
+return  su[math.random(#su)]  
+elseif not is_sudo(msg) and w == "زعيم" and not ww then 
+return  ss97[math.random(#ss97)]  
+elseif w == "كول" and ww then
+if string.len(ww) > 60 then return "🌟|¦ ما اكدر اكول اكثر من 60 حرف 🙌🏾" end
+if sudoname(ww) then return "🌟| ما اكدر احجي عليه مستحيل 🕵🏻" end
+return tdcli.sendMessage(msg.to.id, 0, 1, '<code>'..ww..'</code>', 1, 'html')
+elseif w == "كله" and ww then
+if string.len(ww) > 60 then return "🌟|¦ ما اكدر اكله اكثر من 60 حرف 🙌🏾" end
+if sudoname(ww) then return "🌟| ما اكدر احجي عليه مستحيل 🕵🏻" end
+if msg.reply_id then
+return tdcli.sendMessage(msg.to.id, msg.reply_id, 1, '<code>'..ww..'</code>', 1, 'html')
+end
+elseif w == "اتفل" and ww then
+if sudoname(ww) then return "🌟| ما اكدر اتفل عليه مستحيل 🕵🏻" end
+if msg.reply_id then
+ tdcli.sendMessage(msg.to.id, msg.id, 1, 'اوك سيدي 🌝🍃', 1, 'html')
+ tdcli.sendMessage(msg.to.id, msg.reply_id, 1, 'ختفوووووووووو💦💦️️', 1, 'html')
+ else 
+return"  🕵🏻 وينه بله سويله رد 🙄"
+end
+elseif w == "زعيم رزله" and ww and is_sudo(msg) then
+if msg.reply_id then
+ tdcli.sendMessage(msg.to.id, msg.id, 1, 'اوك سيدي 🌝🍃', 1, 'html')
+ tdcli.sendMessage(msg.to.id, msg.reply_id, 1, 'يا ول شو طالعة عينك😒 من البنات مو😪و هم صايرلك لسان تحجي😠اشو تعال👋👊صير حباب مرة ثانية ترةة ...😉و لا تخليني البسك عمامة و اتفل عليك😂️', 1, 'html')
+end
+elseif w == "بوس" and ww then 
+if sudoname(ww) then
+return " امممح عـﮩـموري┇🎵™ هذا العشق😻💋"
+else
+if msg.reply_id then
+return  bs[math.random(#bs)] 
+else
+return "🌟| وينه بله سويله رد 🕵🏻"
+end
+end
+elseif w == "تحب" and ww then
+if sudoname(ww) then
+return "اموت عليةة عـﮩـموري┇🎵™ هذا العشق😻💋"
+else
+return  thb[math.random(#thb)] 
+end
+elseif is_sudo(msg) and w =="هلو" then
+return  sh[math.random(#sh)]  
+elseif not is_sudo(msg) and w =="هلو" then
+return  ns[math.random(#ns)]  
+elseif is_sudo(msg) and w == "احبك" then
+return  lovs
+elseif is_sudo(msg) and w == "تحبني" or w=="حبك"  then
+return  lovs
+elseif not is_sudo(msg) and w == "احبك" or w=="حبك" then
+return  lovm[math.random(#lovm)]  
+elseif not is_sudo(msg) and w == "تحبني" then
+return  lovm[math.random(#lovm)]  
+elseif w== "ڤير"  then
+return  ss97[math.random(#ss97)]  
+elseif w== "غني" or w=="غنيلي" then
+return  song[math.random(#song)] 
+elseif w=="اتفل" or w=="تفل" then
+if is_mod(msg) then return 'ختفوووووووووو💦💦️️' else return "🌟| انجب ما اتفل عيب 😼🙌🏿" end
+elseif w== "تف" then
+return  "عيب ابني/بتي اتفل/ي اكبر منها شوية 😌😹"
+elseif w== "شلونكم" or w== "شلونك" or w== "شونك" or w== "شونكم"   then
+return  "احســن مــن انتهــــہ شــلونـــك شــخــبـارك يـــول مۂــــشتـــاقـــلك شــو ماكـــو 😹🌚"
+elseif w== "صاكه"  then
+return  "اووويلي يابه 😍❤️ دزلي صورتهه 🐸💔"
+elseif w== "وينك"  then
+return   "دور بكلبك وتلكاني 😍😍❤️"
+elseif w== "منورين"  then
+return  "من نورك عمري ❤️🌺"
+elseif w== "هاي"  then
+return  "هايات عمري 😍🍷"
+elseif w== "🙊"  then
+return  "فديت الخجول 🙊 😍"
+elseif w== "😢"  then
+return  "لتبجي حياتي 😢"
+elseif w== "😭"  then
+return  "لتبجي حياتي 😭😭"
+elseif w== "منور"  then
+return  "نِْـِْـــِْ([💡])ِْــــًِـًًْـــِْـِْـِْـورِْكِْ"
+elseif w== "😒" and not is_sudo then
+return  "شبيك-ج عمو 🤔"
+elseif w== "مح"  then
+return  "محات حياتي🙈❤"
+elseif w== "شكرا" or w== "ثكرا" then
+return  "{ •• الـّ~ـعـفو •• }"
+elseif w== "انته وين"  then
+return  "بالــبــ🏠ــيــت"
+elseif w== "😍"  then
+return  " يَمـه̷̐ إآلُحــ❤ــب يَمـه̷̐ ❤️😍"
+elseif w== "اكرهك"  then
+return  "ديله شلون اطيق خلقتك اني😾🖖🏿🕷"
+elseif w== "اريد اكبل"  then
+return  "خخ اني هم اريد اكبل قابل ربي وحد😹🙌️"
+elseif w== "باي" or w=="بااي" or w=="باااي" or w=="بااااي" then
+return  "بايات حياتي ❤️ " ..name_user.."\n"
+elseif w== "ضوجه"  then
+return  "شي اكيد الكبل ماكو 😂 لو بعدك/ج مازاحف/ة 🙊😋"
+elseif w== "اروح اصلي"  then
+return  "انته حافظ سوره الفاتحة😍❤️️"
+elseif w== "صاك"  then
+return  "زاحفه 😂 منو هذا دزيلي صورهه"
+elseif w== "اجيت" or w=="اني اجيت" then
+return  "كْـٌﮩٌﮧٌ﴿😍﴾ـﮩٌول الـ୭ـهـٌ୭ـْلا❤️"
+elseif w== "طفي السبلت"  then
+return  "تم اطفاء السبلت بنجاح 🌚🍃"
+elseif w== "شغل السبلت"  then
+return  "تم تشغيل السبلت بنجاح بردتو مبردتو معليه  🌚🍃"
+elseif w== "حفلش"  then
+return  "افلش راسك 🤓"
+elseif w=="نايمين" then
+return  "ني سهران احرسكـم😐🍃'"
+elseif w=="اكو احد" then
+return  "يي عيني انـي موجـود🌝🌿"
+elseif w=="شكو" then
+return  "كلشي وكلاشي🐸تگـول عبالك احنـة بالشورجـة🌝"
+elseif w=="انتة منو" then
+return  "آني كـامل مفيد اكبر زنگين أگعدة عالحديـد🙌"
+elseif w=="كلخرا" then
+return  "خرا ليترس حلكك/ج ياخرا يابنلخرا خختفووو ابلع😸🙊💋"
+elseif w== "حبيبتي"  then
+return  "منو هاي 😱 تخوني 😔☹"
+elseif w== "حروح اسبح"  then
+return  "واخيراً 😂"
+elseif w== "😔"  then
+return  "ليش الحلو ضايج ❤️🍃"
+elseif w== "☹️"  then
+return  "لضوج حبيبي 😢❤️🍃"
+elseif w== "جوعان"  then
+return  "تعال اكلني 😐😂"
+elseif w== "تعال خاص" or w== "خاصك" or w=="شوف الخاص" or w=="شوف خاص" then
+return  "ها شسون 😉"
+elseif w== "لتحجي"  then
+return  "وانت شعليك حاجي من حلگگ😒"
+elseif w== "معليك" or w== "شعليك" then
+return  "عليه ونص 😡"
+elseif w== "شدسون" or w== "شداتسوون" or w== "شدتسون" then
+return  "نطبخ 😐"
+elseif w== "شلونك زعيم"  then
+return "احســن مــن انتهــــہ شــلونـــك شــخــبـارك يـــول مۂــــشتـــاقـــلك شــو ماكـــو 😹🌚"
+elseif w== "يومه فدوه"  then
+return  "فدؤه الج حياتي 😍😙"
+elseif w== "افلش"  then
+return  "باند عام من 30 بوت 😉"
+elseif w== "احبج"  then
+return  "يخي احترم شعوري 😢"
+elseif w== "شكو ماكو"  then
+return  "غيرك/ج بل كلب ماكو يبعد كلبي😍❤️️"
+elseif w== "اغير جو"  then
+return  "😂 تغير جو لو تسحف 🐍 عل بنات"
+elseif w== "😋"  then
+return  "طبب لسانك جوه عيب 😌"
+elseif w== "😡"  then 
+return  "ابرد  🚒"  
+elseif w== "مرحبا"  then
+return  "مراحب 😍❤️ نورت-ي 🌹"
+elseif w== "سلام" or w== "السلام عليكم" or w== "سلام عليكم" or w=="سلامن عليكم" or w=="السلامن عليكم" then
+return  "وعليكم السلام اغاتي🌝👋" 
+elseif w== "واكف"  then
+return  "يخي مابيه شي ليش تتفاول😢" 
+elseif w== "🚶🏻"  then
+return  "لُـﮩـضڵ تتـمشـﮥ اڪعـد ﺳـﯠڵـف 🤖👋🏻"
+elseif w== "البوت واكف"  then
+return  "هياتني 😐"
+elseif w == "ضايج"  then 
+return  "ليش ضايج حياتي"
+elseif w== "ضايجه"  then
+return  "منو مضوجج كبدايتي"
+elseif w== "😳" or w== "😳😳" or w== "😳😳😳" then
+--return  "ها بس لا شفت خالتك الشكره 😳😹🕷"
+elseif w== "صدك"  then
+return  "قابل اجذب عليك!؟ 🌚"
+elseif w== "شغال"  then
+return  "نعم عزيزي باقي واتمدد 😎🌿"
+elseif w== "تخليني"  then
+return  "اخليك بزاويه 380 درجه وانته تعرف الباقي 🐸"
+elseif w== "فديتك" or w== "فديتنك"  then
+return  "فداكـ/چ ثولان العالـم😍😂" 
+elseif w== "بوت"  then
+return  "أسمي زعيم 🌚🌸"
+elseif w== "مساعدة"  then
+return  "لعرض قائمة المساعدة اكتب الاوامر 🌚❤️"
+elseif w== "زاحف"  then
+return  "زاحف عله خالتك الشكره 🌝"
+elseif w== "حلو"  then
+return  "انت الاحلى 🌚❤️"
+elseif w== "تبادل"  then
+return  "كافي ملينه تبادل 😕💔"
+elseif w== "عاش"  then
+return  "الحلو 🌝🌷"
+elseif w== "مات"  then
+return  "أبو الحمامات 🕊🕊"
+elseif w== "ورده" or w== "وردة"  then
+return  "أنت/ي  عطرها 🌹🌸"
+elseif w== "شسمك"  then
+return  "مكتوب فوك 🌚🌿"
+elseif w== "فديت" or w=="فطيت" then
+return  "فداك/ج 💞🌸"
+elseif w== "واو"  then
+return  "قميل 🌝🌿"
+elseif w== "زاحفه" or w== "زاحفة"  then
+return  "لو زاحفتلك جان ماكلت زاحفه 🌝🌸"
+elseif w== "حبيبي" or w=="حبي"  then
+return  "بعد روحي 😍❤️ تفضل"
+elseif w== "حبيبتي"  then
+return  "تحبك وتحب عليك 🌝🌷"
+elseif w== "حياتي"  then
+return  "ها حياتي 😍🌿"
+elseif w== "عمري"  then
+return  "خلصته دياحه وزحف 🌝🌿 "
+elseif w== "اسكت"  then
+return  "وك معلم 🌚💞"
+elseif w== "بتحبني"  then
+return  "بحبك اد الكون 😍🌷"
+elseif w== "المعزوفه" or w=="المعزوفة" or w=="معزوفه" then
+return  "طرطاا طرطاا طرطاا 😂👌"
+elseif w== "موجود"  then
+return  "تفضل عزيزي 🌝🌸"
+elseif w== "اكلك"  then
+return  ".كول حياتي 😚🌿"
+elseif w== "فدوه" or w=="فدوة" or w=="فطوه" or w=="فطوة" then      
+return  "لكلبك/ج 😍❤️"
+elseif w== "دي"  then
+return  "خليني احہۣۗبہۜۧ😻ہہۖۗڱֆ ̮⇣  🌝💔"
+elseif w== "اشكرك"  then
+return  "بخدمتك/ج حبي ❤"
+elseif w== "😉"  then
+return  "😻🙈"
+elseif w== "اقرالي دعاء"  then
+return "اللهم عذب المدرسين 😢 منهم الاحياء والاموات 😭🔥 اللهم عذب ام الانكليزي 😭💔 وكهربها بلتيار الرئيسي 😇 اللهم عذب ام الرياضيات وحولها الى غساله بطانيات 🙊 اللهم عذب ام الاسلاميه واجعلها بائعة الشاميه 😭🍃 اللهم عذب ام العربي وحولها الى بائعه البلبي اللهم عذب ام الجغرافيه واجعلها كلدجاجه الحافية اللهم عذب ام التاريخ وزحلقها بقشره من البطيخ وارسلها الى المريخ اللهم عذب ام الاحياء واجعلها كل مومياء اللهم عذب المعاون اقتله بلمدرسه بهاون 😂😂😂"
+elseif msg.edited and not is_sudo(msg) and settings.lock_edit =="❌" then
+return "سحك وعدل 😹☝🏿"
+-------------- صوتيات
+elseif w == "ابجي" then
+--send_document(get_receiver(msg), "data/stickers/ebke.webp", ok_cb, false)
+elseif w == "اضحك" then
+--send_document(get_receiver(msg), funstickers[math.random(#funstickers)], ok_cb, false)
+elseif w == "زعيم عفط" and ww and msg.reply_id and is_sudo(msg) then
+if msg.reply_id then
+return tdcli.sendVoice(msg.chat_id_, msg.reply_id, 0, 1, nil, 'data/audio/zeg.ogg', nil, nil, '🌟|اسمع الزيج  اسمع 🔊')
+end
+elseif w == "زعيم بوس" and ww and msg.reply_id and is_sudo(msg) then
+if msg.reply_id then
+return tdcli.sendAnimation(msg.to.id, msg.reply_id, 0, 1, nil, "data/photo/bos.mp4", nil, nil, 'مح 💋')  
+end
+---------------------------------------------
+elseif w == "انجب" or w == "نجب" or w=="جب" then
+if is_sudo(msg) then 
+return   "حاضر تاج راسي انجبيت 😇 "
+elseif is_admin1(msg) then
+return   " لخاطرك راح اسكت لان ادمن واحترمك 😌"
+elseif is_owner(msg) then
+return   "لخاطرك راح اسكت لان مدير وع راسي  😌"
+elseif is_mod(msg) then
+return   "فوك مامصعدك ادمن ؟؟ انته انجب 😏"
+else
+return   "انجب انته لاتندفر 😏"
+end
+elseif  data[tostring(msg.to.id)]['replay'] and data[tostring(msg.to.id)]['replay'][w] then
+return  data[tostring(msg.to.id)]['replay'][w] 
+
+end
+end 
+else
+return
+end
+---------------------------------------------
+    
+---------------------------------------------
+
+end
+return {
+patterns = {
+"^(زعيم عفط)(.*)$", 
+"^(زعيم اتفل)(.*)$", 
+"^(زعيم رزله)(.*)$", 
+"^(زعيم بوس)(.*)$", 
+"^(تحب) (.*)$",
+"^(زعيم) (.*)$",
+"^(كله) (.*)$",
+"^(كول) (.*)$",
+"^(بوس) (.*)$", 
+"^(رد) (اضف) ([^%s]+) (.+)$",
+"^(رد) (مسح الكل)$",
+"^(رد) (مسح) (.*)$",
+"(.*)" 
+},
+run = run,
+}
+end
+-- write by Dev MOHAMMED HISHAM
+-- tele : @TH3BOSS
