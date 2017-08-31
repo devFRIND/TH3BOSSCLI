@@ -6,31 +6,26 @@ local user = msg.from.id
 local is_channel = msg.to.type == "channel"
 local auto_leave = 'auto_leave_bot'
 
-if msg.from.username then -- فانكشن اليوزرنيم
-usernamex = "@"..(msg.from.username or "---")
-member = "@"..(msg.from.username or "---")
-else
-usernamex = "ما مسوي  😹💔"
-member = name_user
+   if is_channel then
+        local TIME_CHECK = 2
+        if data[tostring(chat)] then
+          if data[tostring(chat)]['settings']['time_check'] then
+            TIME_CHECK = tonumber(data[tostring(chat)]['settings']['time_check'])
+          end
+        end
+    if msg.text then
+  if msg.text:match("(.*)") then
+    if not data[tostring(msg.to.id)] and not redis:get(auto_leave) and not is_admin(msg) then
+  tdcli.sendMessage(msg.to.id, "", 0, "_🌟| هذه المجموعه ليست في قائمة _ *مجموعاتي*", 0, "md")
+  tdcli.changeChatMemberStatus(chat, our_id, 'Left', dl_cb, nil)
+      end
+   end
 end
-
-
-if is_channel then
-
-local TIME_CHECK = 2
-
-if data[tostring(chat)] then
-if data[tostring(chat)]['settings']['time_check'] then
-TIME_CHECK = tonumber(data[tostring(chat)]['settings']['time_check'])
-end
-end
-
-
-if data[tostring(chat)] and data[tostring(chat)]['mutes'] then
-mutes = data[tostring(chat)]['mutes']
-else
-return
-end
+    if data[tostring(chat)] and data[tostring(chat)]['mutes'] then
+		mutes = data[tostring(chat)]['mutes']
+	else
+		return
+	end
 
 	if mutes.mute_gif then
 		mute_gif = mutes.mute_gif
@@ -170,261 +165,354 @@ end
 	
 	
 	
+	
+  if msg.adduser or msg.joinuser or msg.deluser then
+  if mute_tgservice == "☑️" then
+del_msg(chat, tonumber(msg.id))
+  end
+end
+if msg.from.username then
+usernamex = "@"..(msg.from.username or "---")
+member = "@"..(msg.from.username or "---")
+else
+usernamex = "ما مسوي  😹💔"
+member = name_user
+end
 
-	    
-if msg.adduser or msg.joinuser or msg.deluser then -- قفل الاشعارات
-if mute_tgservice == "☑️️" then
+   if msg.pinned then
+  if lock_pin == "☑️" then
+     if is_owner(msg) then
+      return
+     end
+     if tonumber(msg.from.id) == our_id then
+      return
+     end
+    local pin_msg = data[tostring(chat)]['pin']
+      if pin_msg then
+  tdcli.pinChannelMessage(msg.to.id, pin_msg, 1)
+       elseif not pin_msg then
+   tdcli.unpinChannelMessage(msg.to.id)
+          end
+     tdcli.sendMessage(msg.to.id, msg.id, 0, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n<i>♨️| عذرا التثبيث في هذه المجموعه مقفل ❌  </i>', 0, "html")
+
+      end
+  end
+if not is_mod(msg) and not is_whitelist(msg.from.id, msg.to.id) and msg.from.id ~= our_id then
+    
+    	if msg.adduser or msg.joinuser then
+		if lock_join == "☑️" then
+			function join_kick(arg, data)
+				kick_user(data.id_, msg.to.id)
+			end
+			if msg.adduser then
+				tdcli.getUser(msg.adduser, join_kick, nil)
+			elseif msg.joinuser then
+				tdcli.getUser(msg.joinuser, join_kick, nil)
+			end
+		end
+end
+if msg.edited and lock_edit == "☑️" then
+
+ del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌| عذراً ممنوع التعديل تم المسح 🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+  end
+if msg.forward_info_ and mute_forward == "☑️" then
+
+  del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "‼️|عذرا ممنوع اعادة التوجيه  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+  end
+  end
+if msg.photo_ and mute_photo == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الصور  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.video_ and mute_video == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الفيديو  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.document_ and mute_document == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الملفات  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.sticker_ and mute_sticker == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "‼️|عذرا ممنوع ارسال الملصقات  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.animation_ and mute_gif == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الصور المتحركه  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.contact_ and mute_contact == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال جهات الاتصال  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+
+
+end
+end
+    if msg.location_ and mute_location == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الموقع  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+end
+
+
+end
+    if msg.voice_ and mute_voice == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال البصمات  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+   if msg.content_ and mute_keyboard == "☑️" then
+  if msg.reply_markup_ and  msg.reply_markup_.ID == "ReplyMarkupInlineKeyboard" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا الكيبورد مقفول  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+  
+   end
+end
+    if tonumber(msg.via_bot_user_id_) ~= 0 and mute_inline == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا الانلاين مقفول  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+    if msg.game_ and mute_game == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع لعب الالعاب  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+    if msg.audio_ and mute_audio == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الصور  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+if msg.media.caption then
+local link_caption = msg.media.caption:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]/") or msg.media.caption:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Dd][Oo][Gg]/") or msg.media.caption:match("[Tt].[Mm][Ee]/") or msg.media.caption:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]/")
+if link_caption and lock_link == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال الروابط  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+local tag_caption = msg.media.caption:match("@") or msg.media.caption:match("#")
+if tag_caption and lock_tag == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|عذرا ممنوع ارسال التاك او المعرف  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+if is_filter(msg, msg.media.caption) then
+
+ del_msg(chat, tonumber(msg.id))
+  
+    end
+
+end
+if msg.text then
+			local _nl, ctrl_chars = string.gsub(msg.text, '%c', '')
+        local max_chars = 40
+        if data[tostring(msg.to.id)] then
+          if data[tostring(msg.to.id)]['settings']['set_char'] then
+            max_chars = tonumber(data[tostring(msg.to.id)]['settings']['set_char'])
+          end
+        end
+			 local _nl, real_digits = string.gsub(msg.text, '%d', '')
+			local max_real_digits = tonumber(max_chars) * 50
+			local max_len = tonumber(max_chars) * 51
+			if lock_spam == "☑️" then
+			if string.len(msg.text) > max_len or ctrl_chars > max_chars or real_digits > max_real_digits then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|ممنوع ارسال الكليشه والا سوف تجبرني على طردك  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+  
+   end
+end
+local link_msg = msg.text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]/") or msg.text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Dd][Oo][Gg]/") or msg.text:match("[Tt].[Mm][Ee]/") or msg.text:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]/")
+if link_msg and lock_link == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|ممنوع ارسال الروابط  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+local tag_msg = msg.text:match("@") or msg.text:match("#")
+if tag_msg and lock_tag == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|ممنوع ارسال المعرف او التاك  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
+
+
+end
+if is_filter(msg, msg.text) then
 del_msg(chat, tonumber(msg.id))
 end
+
+if msg.text:match("(.*)") and mute_text == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+
+   end
 end
+if mute_all == "☑️" then 
 
+ del_msg(chat, tonumber(msg.id))
 
-if msg.pinned then -- قفل التثبيت
-if lock_pin == "☑️️" then
-if is_owner(msg) then return end
-if tonumber(msg.from.id) == our_id then return end
-local pin_msg = data[tostring(chat)]['pin']
-if pin_msg then
-tdcli.pinChannelMessage(msg.to.id, pin_msg, 1)
-elseif not pin_msg then
-tdcli.unpinChannelMessage(msg.to.id)
 end
-return tdcli.sendMessage(msg.to.id, msg.id, 0, '<b>🌟|  الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|  المعرف :</b> '..usernamex..'\n<i>❌| عذرا التثبيث في هذه المجموعه مقفل ❌  </i>', 0, "html")
-end
-end
+if msg.content_.entities_ and msg.content_.entities_[0] then
+    if msg.content_.entities_[0].ID == "MessageEntityMentionName" then
+      if lock_mention == "☑️" then
+
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|MessageEntityMentionName  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
 
 
+          end
+      end
+  if msg.content_.entities_[0].ID == "MessageEntityUrl" or msg.content_.entities_[0].ID == "MessageEntityTextUrl" then
+      if lock_webpage == "☑️" then
+if is_channel then
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|MessageEntityUrl  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
 
 
-if not is_mod(msg) and not is_whitelist(msg.from.id, msg.to.id) and msg.from.id ~= our_id then -- للاعضاء فقط
+          end
+      end
+  if msg.content_.entities_[0].ID == "MessageEntityBold" or msg.content_.entities_[0].ID == "MessageEntityCode" or msg.content_.entities_[0].ID == "MessageEntityPre" or msg.content_.entities_[0].ID == "MessageEntityItalic" then
+      if lock_markdown == "☑️" then
+if is_channel then
+   del_msg(chat, tonumber(msg.id))
+ if lock_woring == "☑️" then
+     local msgx = "❌|الماركدوان  🗣"
+tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟|الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟|الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟|المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
+     end
 
+
+          end
+      end
+ end
 if msg.to.type ~= 'pv' then
-	
--- Total user msgs
-local hashxmsgs = 'msgs:'..msg.from.id..':'..msg.to.id
-redis:incr(hashxmsgs)
-  
-if lock_flood == "☑️️" and not is_mod(msg) and not is_whitelist(msg.from.id, msg.to.id) and not msg.adduser and msg.from.id ~= our_id then
-local hash = 'user:'..user..':msgs'
-local msgs = tonumber(redis:get(hash) or 0)
-local NUM_MSG_MAX = 5
-if data[tostring(chat)] then
-if data[tostring(chat)]['settings']['num_msg_max'] then
-NUM_MSG_MAX = tonumber(data[tostring(chat)]['settings']['num_msg_max'])
-end
-end
-if msgs > NUM_MSG_MAX then
-if msg.from.username then
-user_name = "@"..msg.from.username
-else
-user_name = msg.from.first_name
-end
+  if lock_flood == "☑️" and not is_mod(msg) and not is_whitelist(msg.from.id, msg.to.id) and not msg.adduser and msg.from.id ~= our_id then
+    local hash = 'user:'..user..':msgs'
+    local msgs = tonumber(redis:get(hash) or 0)
+        local NUM_MSG_MAX = 5
+        if data[tostring(chat)] then
+          if data[tostring(chat)]['settings']['num_msg_max'] then
+            NUM_MSG_MAX = tonumber(data[tostring(chat)]['settings']['num_msg_max'])
+          end
+        end
+    if msgs > NUM_MSG_MAX then
+   if msg.from.username then
+      user_name = "@"..msg.from.username
+         else
+      user_name = msg.from.first_name
+     end
 if redis:get('sender:'..user..':flood') then
 return
 else
-del_msg(chat, msg.id)
-kick_user(user, chat)
-tdcli.sendMessage(chat, msg.id, 0, "_🌟|  العضو_ :  "..user_name.."\n _🌟| الايدي_ : `["..user.."]`\n _🌟|  عذرا ممنوع التكرار في هذه المجموعه لقد تم طردك ☑️️_\n 🌟|  مـطـور الـسـورس : محمد هشام 🗣", 0, "md")
+   del_msg(chat, msg.id)
+    kick_user(user, chat)
+
+  tdcli.sendMessage(chat, msg.id, 0, "_🌟| العضو_ :  "..user_name.."\n _🌟|الايدي_ : `["..user.."]`\n _🌟| عذرا ممنوع التكرار في هذه المجموعه لقد تم طردك ☑️_\n 🌟| مـطـور الـسـورس : الزعـيـم > @TH3BOSS", 0, "md")
 redis:setex('sender:'..user..':flood', 30, true)
-end
-end
-redis:setex(hash, TIME_CHECK, msgs+1)
-end
-end
-
-if msg and is_silent_user(msg.from.id, msg.to.id) then -- الكتم
-del_msg(chat, tonumber(msg.id))
-end
-
-if msg.text and mute_text == "☑️️" then --قفل الدردشه
-del_msg(chat, tonumber(msg.id))
-end
-
-if msg and mute_all == "☑️️" then -- قفل المجموعه
- del_msg(chat, tonumber(msg.id))
-end
-   
-if msg.adduser or msg.joinuser then -- قفل الاضافه
-if lock_join == "☑️️" then
-function join_kick(arg, data)
-kick_user(data.id_, msg.to.id)
-end
-if msg.adduser then
-tdcli.getUser(msg.adduser, join_kick, nil)
-elseif msg.joinuser then
-tdcli.getUser(msg.joinuser, join_kick, nil)
+      end
+    end
+    redis:setex(hash, TIME_CHECK, msgs+1)
+               end
+           end
+      end
+   end
 end
 end
 end
-
-if msg.forward_info_ and mute_forward == "☑️️" then -- قفل التوجيه
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع اعادة التوجيه  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-
-elseif msg.media.caption then -- الرسايل الي بالكابشن
-
-if (msg.media.caption:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]/") or msg.media.caption:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Dd][Oo][Gg]/") or msg.media.caption:match("[Tt].[Mm][Ee]/") or msg.media.caption:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]/")) and lock_link == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الروابط  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>��¦ المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif (msg.media.caption:match("@") or msg.media.caption:match("#")) and lock_tag == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال التاك او المعرف  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif is_filter(msg, msg.media.caption) then
-del_msg(chat, tonumber(msg.id))
-end
-
-elseif msg.text then -- رسايل فقط
-    
-local _nl, ctrl_chars = string.gsub(msg.text, '%c', '')
-local max_chars = 2000
-local max_len =  2000
-if (string.len(msg.text) > max_len or ctrl_chars > max_chars) and lock_spam == "☑️️"  then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|ممنوع ارسال الكليشه والا سوف تجبرني على طردك  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif (msg.text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Mm][Ee]/") or msg.text:match("[Tt][Ee][Ll][Ee][Gg][Rr][Aa][Mm].[Dd][Oo][Gg]/") or msg.text:match("[Tt].[Mm][Ee]/") or msg.text:match("[Tt][Ll][Gg][Rr][Mm].[Mm][Ee]/")) and lock_link == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|ممنوع ارسال الروابط  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif (msg.text:match("@") or msg.text:match("#")) and lock_tag == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|ممنوع ارسال المعرف او التاك  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif is_filter(msg, msg.text) then
-del_msg(chat, tonumber(msg.id))
-end
-
-   
-elseif msg.edited and lock_edit == "☑️️" then -- قفل التعديل
- del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌| عذراً ممنوع التعديل تم المسح 🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.photo_ and mute_photo == "☑️️" then -- قفب الصور
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الصور  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.video_ and mute_video == "☑️️" then -- قفل الفيديو
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الفيديو  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.document_ and mute_document == "☑️️" then -- قفل الملفات
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الملفات  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.sticker_ and mute_sticker == "☑️️" then --قفل الملصقات
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الملصقات  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.animation_ and mute_gif == "☑️️" then -- قفل المتحركه
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الصور المتحركه  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.contact_ and mute_contact == "☑️️" then -- قفل الجهات
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال جهات الاتصال  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.location_ and mute_location == "☑️️" then -- قفل الموقع
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الموقع  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.voice_ and mute_voice == "☑️️" then -- قفل البصمات
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال البصمات  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif tonumber(msg.via_bot_user_id_) ~= 0 and mute_inline == "☑️️" then -- قفل الانلاين
-del_msg(chat, tonumber(msg.id))
- if lock_woring == "☑️️" then
-local msgx = "❌|عذرا الانلاين مقفول  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.game_ and mute_game == "☑️️" then -- قفل الالعاب
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع لعب الالعاب  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.audio_ and mute_audio == "☑️️" then -- قفل الصوت
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذرا ممنوع ارسال الصور  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-
-elseif msg.content_ and msg.reply_markup_ and  msg.reply_markup_.ID == "ReplyMarkupInlineKeyboard" and mute_keyboard == "☑️️" then -- كيبورد
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذرا الكيبورد مقفول  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-elseif msg.content_.entities_ and msg.content_.entities_[0] then
-
-if msg.content_.entities_[0].ID == "MessageEntityMentionName"  and lock_mention == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "التذكير !!  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-end
-
-if (msg.content_.entities_[0].ID == "MessageEntityUrl" or msg.content_.entities_[0].ID == "MessageEntityTextUrl") and lock_webpage == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|عذراٌ ممنوع ارسال روابط الويب  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-end
-
-
-if (msg.content_.entities_[0].ID == "MessageEntityBold" or msg.content_.entities_[0].ID == "MessageEntityCode" or msg.content_.entities_[0].ID == "MessageEntityPre" or msg.content_.entities_[0].ID == "MessageEntityItalic" ) and lock_markdown == "☑️️" then
-del_msg(chat, tonumber(msg.id))
-if lock_woring == "☑️️" then
-local msgx = "❌|ممنوع ارسال الماركدوان  🗣"
-tdcli.sendMessage(msg.to.id, 0, 1, '<b>🌟| الاسم :</b> <code>'..(msg.from.first_name or '')..'\n</code><b>🌟| الايدي :</b> <code>'..msg.from.id..'</code>\n<b>🌟| المعرف :</b> '..usernamex..'\n'..msgx, 0, "html")    
-end
-end
-
-end
-
-end
-end
-end
-
-
-
-
 return {
 	patterns = {},
 	pre_process = pre_process
