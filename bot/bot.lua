@@ -88,6 +88,8 @@ function create_config( )
     "msg-checks",
     "plugins",
     "tools",
+    "replay",
+
 
 	},
     sudo_users = {sudo_id},
