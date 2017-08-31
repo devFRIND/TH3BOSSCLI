@@ -381,9 +381,9 @@ local text2 = '🌟| الاشتراك في هذه المجموعه انتهى \n
 	end
 	if msg.adduser and msg.adduser == tonumber(our_id) then
 local rsala = [[🌟| مرحبا انا بوت اسمي الزعيم🎖
-   🌟| اختصاصي حمايه كروبات
-   🌟|من السبام والوسائط والتكرار والخ ...
-   🌟|  للاستفسار : @lBOSSl]]
+🌟| اختصاصي حمايه كروبات
+🌟|من السبام والوسائط والتكرار والخ ...
+🌟|  للاستفسار : @lBOSSl]]
 tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil,"data/photo/th3boss.jpg",rsala,dl_cb,nil)
        
 end
@@ -867,7 +867,7 @@ if matches[1] == 'المطور' then
 if matches[1] == 'الاداريين' and is_admin(msg) then
 return adminlist(msg)
     end
-if matches[1] == 'فير غادر' and is_admin(msg) then
+if matches[1] == 'زعيم غادر' and is_admin(msg) then
   tdcli.sendMessage(msg.to.id, msg.id, 1, 'اوك باي 😢💔💯', 1, 'html')
   tdcli.changeChatMemberStatus(msg.to.id, our_id, 'Left', dl_cb, nil)
   			botrem(msg)
@@ -926,9 +926,9 @@ usernamex = "ما مسوي  😹💔"
 member = name_user
 end
 local rsala = [[🌟| مرحبا انا بوت اسمي الزعيم🎖
-   🌟| اختصاصي حمايه كروبات
-   🌟|من السبام والوسائط والتكرار والخ ...
-   🌟|  للاستفسار : @lBOSSl]
+🌟| اختصاصي حمايه كروبات
+🌟|من السبام والوسائط والتكرار والخ ...
+🌟|  للاستفسار : @lBOSSl]]
 
 tdcli.sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil,"data/photo/th3boss.jpg",rsala,dl_cb,nil)
 --tdcli.sendForwarded(reply_id, 0, 0, 1, nil, msg.chat_id_, msg.from.id)
@@ -1109,7 +1109,7 @@ return [[
 🌟| تفعيل  : لتفعيل البوت 
 🌟| تعطيل : لتعطيل البوت 
 🌟| اذاعه : لنشر كلمه 
-🌟| فير غادر : لطرد البوت
+🌟| زعيم غادر : لطرد البوت
 🌟| صنع مجموعه : لصنع مجموعه 
 🌟| سوبر : لجعل المجموعه خارقه
 🌟| مسح الادمنيه : لمسح الادمنيه 
@@ -1121,31 +1121,6 @@ return [[
 راسلني للاستفسار 💡↭ @lBOSSl
 ]]
 end
-
-end
--- خارج شرط المجموعه
-if matches[1]=="تصميم" and matches[2] then
-if not  is_owner(msg) then
-	return"🌟|للمدراء والمطورين فقط !"
-	end
-	
-local _nl, ctrl_chars = string.gsub( matches[2], '%c', '')
-if string.len(matches[2]) > 40 or ctrl_chars > 20 then
-return"🌟|لا يمكن تصميم اسم اكثر من 20 حرف ."
-end
-if matches[2] =="م" then
- text = URL.escape(matches[3])
-  url ="http://text.arfonts.net/textgenerated.php?text="..text.."&clr=A71A21&size=70&font=reqa3-unicode,bader-al-yadawi&fx=both&shdwth=96&otlclr=FFFFFF&res=1&bg=1&bgc=D6CCC3&mtn=01&mts=64&mtc=6C6F73&mto=10"
-else
- text = URL.escape(matches[2])
-  url =	"http://text.arfonts.net/textgenerated.php?text="..text.."&clr=3FACB0&size=70&font=horr-unicode,wafi-normal&w=851&h=315&fx=shdw&shdwth=96&otlclr=FFFFFF&res=1&bg=1&bgc=ECECEC&mtn=07&mts=64&mtc=DAA964&mto=20&th=0&tv=0"
-end
-
-local file1 = download_to_file(url,'write_on_photo.png')
-local file = './bot/write_on_photo.png'
-os.rename(file1, file)
-tdcli.sendMessage(msg.to.id, msg.id, 1, "🌟|انتظر من فضلك ...\n🌟|سوف يتم تصميم الصوره \n🌟|وارسالها لك 💯", 1, 'html')
-tdcli.sendPhoto(msg.to.id, msg.id_, 0, 1, nil, file,'🌟| تم التصميم من قبل الزعيم 🗣',dl_cb,nil)
 
 end
 
@@ -1194,9 +1169,7 @@ patterns = {
 "^(اضافه) (@[%a%d%_]+)$",
 "^(راسل) (@[%a%d%_]+) (.*)$",
 "^(راسل) (%d+) (.*)$",
-"^(فير غادر)$",
-"^(تصميم)(م) (.*)$",
-"^(تصميم) (.*)$",
+"^(زعيم غادر)$",
 "^(مواليدي) (.+)/(.+)/(.+)",
 "^(=)$",
 "^(غادر) (.*)$",
