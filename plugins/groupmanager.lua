@@ -1349,7 +1349,7 @@ local function mute_audio(msg, data, target)
 
 if not is_mod(msg) then
 
- return "🌟| _هذا الامر يخص الادمنيه فقط _ 🚶"
+ return "🌟| _هذا الامر يخص الادمنيه فقط _ ��"
 
 end
 
@@ -2503,7 +2503,7 @@ if matches[1] == "الرابط" and is_mod(msg) then
  if not linkgp then
 return "🌟| _اوه 🙀 لا يوجد هنا رابط_\n🌟| _رجائا اكتب [ضع رابط]_🔃"
       end
-      text = "<b>رابط المجموعة  :</b>\n"..linkgp..msg_caption
+      text = "<b>🌟| رابـط الـمـجـمـوعـه   :</b>\n"..linkgp
         return tdcli.sendMessage(chat, msg.id, 1, text, 1, 'html')
      end
      
@@ -2755,12 +2755,7 @@ if msg.from.first_name then
 if msg.from.username then username = '@'..msg.from.username
 else username = '<i>ما مسوي  😹💔</i>'
 end
-if msg.from.phone_number then telNum = '+'..msg.from.phone_number
-else telNum = '----'
-end
-if msg.from.last_name then lastName = msg.from_lastname
-else lastName = '----'
-end
+
 if is_sudo(msg) then rank = 'المطور مالتي 😻'
 elseif is_owner(msg) then rank = 'مدير المجموعه 😽'
 elseif is_admin(msg) then rank = 'اداري في البوت 😼'
@@ -2768,7 +2763,7 @@ elseif is_mod(msg) then rank = 'ادمن في البوت 😺'
 else rank = 'مجرد عضو 😹'
 end
 local text = '<b>💯️¦ اهـلا بـك معلوماتك :</b>\n\n<b>🌟| الاسم الاول :</b> <i>'..msg.from.first_name
-..'</i>\n<b>🌟| الاسم الثاني :</b> <i>'..lastName
+..'</i>\n<b>🌟| الاسم الثاني :</b> <i>'..(msg.from.last_name  or "---")
 ..'</i>\n<b>🌟| المعرف:</b> '..username
 ..'\n<b>🌟| الايدي :</b> [ <code>'..msg.from.id
 ..'</code> ]\n<b>🌟| ايدي الكروب :</b> [ <code>'..msg.to.id
@@ -2949,7 +2944,7 @@ patterns ={
 '^(رفع ادمن) (.*)$',
 '^(تنزيل ادمن) (.*)$',
 '^(تنزيل ادمن)$',
-'^(رفع المدير)$',
+'^(رفع المدي��)$',
 '^(رفع المدير) (.*)$',
 '^(تنزيل المدير)$',
 '^(تنزيل المدير) (.*)$',
@@ -2991,4 +2986,3 @@ patterns ={
 run=mohammed,
 pre_process = pre_process
 }
-
