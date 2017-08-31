@@ -47,7 +47,7 @@ screen ./autobd.sh
 
 << # Dev Bot @TH3BOSS >>
 
-<< # Channel Bot @llDEV1ll >>
+<< # groupmanger : @lBOSSl  >>
 ```
 ### One command
 To install everything in one command, use:
@@ -65,7 +65,7 @@ cd $HOME && git clone https://github.com/moody2020/TH3BOSS.git && cd TH3BOSS && 
 
 More information [TH3BOSS Global Chat](https://t.me/joinchat/A5_fO0OPsgbb_99AkUgWQ)
 
-More information [TH3BOSS Channel](https://t.me/llDEV1ll)
+More information [TH3BOSS Channel](https://t.me/lBOSSl)
 
 
 * * *
@@ -76,7 +76,7 @@ More information [TH3BOSS Channel](https://t.me/llDEV1ll)
 
 [Mohammed Hisham](https://github.com/moody2020) ([Telegram](https://telegram.me/lBOSSl))
 
-[TEAMBOSS](https://github.com/moody2020) ([Telegram](https://telegram.me/llDEV1ll))
+[TEAMBOSS](https://github.com/moody2020) ([Telegram](https://telegram.me/lBOSSl))
 
 
 ### Our Telegram channel : [@llDEV1ll](https://telegram.me/llDEV1ll)
