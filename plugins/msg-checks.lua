@@ -25,14 +25,6 @@ TIME_CHECK = tonumber(data[tostring(chat)]['settings']['time_check'])
 end
 end
 
-if msg.text then
-if msg.text:match("(.*)") then
-if not data[tostring(msg.to.id)] and not redis:get(auto_leave) and not is_admin(msg) then
-	tdcli.sendMessage(msg.to.id, "", 0, "_🌟| هذه المجموعه ليست في قائمة _ *مجموعاتي*", 0, "md")
-tdcli.changeChatMemberStatus(chat, our_id, 'Left', dl_cb, nil)
-end
-end
-end
 
 if data[tostring(chat)] and data[tostring(chat)]['mutes'] then
 mutes = data[tostring(chat)]['mutes']
