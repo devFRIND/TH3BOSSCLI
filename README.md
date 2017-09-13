@@ -21,9 +21,7 @@
 🔸➖🔹➖🔸➖🔹
 # Let's Install The Bot >>
 🔸➖🔹➖🔸➖🔹
-cd $HOME
-🔸➖🔹➖🔸➖🔹
-git clone https://github.com/moody2020/TH3BOSS.git
+git clone https://github.com/moody2020/TH3BOSSCLI.git
 🔸➖🔹➖🔸➖🔹
 cd TH3BOSS
 🔸➖🔹➖🔸➖🔹
@@ -52,11 +50,11 @@ screen ./autobd.sh
 ### One command
 To install everything in one command, use:
 ```sh
-cd $HOME && git clone https://github.com/moody2020/TH3BOSS.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && ./TH3BOSS.sh
+ git clone https://github.com/moody2020/TH3BOSS.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && ./TH3BOSS.sh
 
 OR
 
-cd $HOME && git clone https://github.com/moody2020/TH3BOSS.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && chmod 777 autobd.sh && screen ./autobd.sh
+git clone https://github.com/moody2020/TH3BOSS.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && chmod 777 autobd.sh && screen ./autobd.sh
 ```
 
 * * *
