@@ -23,7 +23,7 @@
 🔸➖🔹➖🔸➖🔹
 git clone https://github.com/moody2020/TH3BOSSCLI.git
 🔸➖🔹➖🔸➖🔹
-cd TH3BOSS
+cd TH3BOSSCLI
 🔸➖🔹➖🔸➖🔹
 chmod +x TH3BOSS.sh
 🔸➖🔹➖🔸➖🔹
@@ -50,11 +50,11 @@ screen ./autobd.sh
 ### One command
 To install everything in one command, use:
 ```sh
- git clone https://github.com/moody2020/TH3BOSSCLI.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && ./TH3BOSS.sh
+ git clone https://github.com/moody2020/TH3BOSSCLI.git && cd TH3BOSSCLI && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && ./TH3BOSS.sh
 
 OR
 
-git clone https://github.com/moody2020/TH3BOSSCLI.git && cd TH3BOSS && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && chmod 777 autobd.sh && screen ./autobd.sh
+git clone https://github.com/moody2020/TH3BOSSCLI.git && cd TH3BOSSCLI && chmod +x TH3BOSS.sh && ./TH3BOSS.sh install && chmod 777 autobd.sh && screen ./autobd.sh
 ```
 
 * * *
